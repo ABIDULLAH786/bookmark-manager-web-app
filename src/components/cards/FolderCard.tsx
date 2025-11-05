@@ -1,0 +1,47 @@
+"use client"
+import React from 'react';
+import { Folder as FolderIcon, MoreVertical } from 'lucide-react';
+import { Card, CardContent } from './Card';
+import { Folder } from '@/types';
+import { useFolderNavigation } from '@/hook/useFolderNavigation';
+import { Button } from '../ui/button';
+
+interface FolderCardProps {
+  folder: Folder;
+  itemCount?: number;
+}
+
+export function FolderCard({ folder, itemCount = 0 }: FolderCardProps) {
+  const { goToFolder } = useFolderNavigation();
+
+  return (
+    <Card className="group hover:shadow-md transition-all duration-200 cursor-pointer" onClick={() => goToFolder(folder?.id)}>
+      <CardContent className="p-4">
+        <div className="flex items-start justify-between mb-3">
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center">
+              <FolderIcon className="h-4 w-4 text-primary" />
+            </div>
+            <div className="flex-1">
+              <h3 className="font-medium">{folder.name}</h3>
+              <p className="text-sm text-muted-foreground">
+                {itemCount} {itemCount === 1 ? 'item' : 'items'}
+              </p>
+            </div>
+          </div>
+          <Button
+            variant="ghost"
+            size="sm"
+            className="opacity-0 group-hover:opacity-100 transition-opacity"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <MoreVertical className="h-4 w-4" />
+          </Button>
+        </div>
+        {folder.description && (
+          <p className="text-sm text-muted-foreground line-clamp-2">{folder.description}</p>
+        )}
+      </CardContent>
+    </Card>
+  );
+}
