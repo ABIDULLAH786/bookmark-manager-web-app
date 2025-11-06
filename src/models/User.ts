@@ -3,27 +3,29 @@ import bcrypt from "bcryptjs";
 
 export interface IUser {
     _id?: mongoose.Types.ObjectId;
+    username: string;
     email: string;
     password?: string;
-    provider: string;
-    email_verified: boolean;
     image: string;
+    provider: string;
+    emailVerified: boolean;
     createdAt?: Date;
     updatedAt?: Date;
 }
 
 const userSchema = new Schema<IUser>({
+    username: { type: String, required: true },
     email: { type: String, required: true, unique: true, index: true },
     password: { type: String, },
     provider: { type: String, default: "credentials" },
-    email_verified: { type: Boolean, default: false },
+    emailVerified: { type: Boolean, default: false },
     image: { type: String },
 }, { timestamps: true })
 
 
 userSchema.pre("save", async function (next) {
     console.log("this.password: ", this.password);
-    
+
     if (this.isModified("password") && this.password) {
         this.password = await bcrypt.hash(this.password, 10);
     }
