@@ -1,6 +1,8 @@
+import dotenv from "dotenv";
+dotenv.config();
 import mongoose from "mongoose";
 
-const MONGODB_URL = process.env.DB_URI!;
+const MONGODB_URL = process.env.MONGODB_URL! //|| "mongodb://localhost:27017/bookmarkv1";
 if (!MONGODB_URL) throw new Error("Please define mongo_uri in env variables");
 
 
