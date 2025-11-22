@@ -37,6 +37,15 @@ export const mockData: BookmarkData = {
   ],
   bookmarks: [
     {
+      id: '10',
+      title: 'React Documentation',
+      url: 'https://react.dev',
+      description: 'Official React documentation',
+      icon: '🌐',
+      folderId: '1',
+      createdAt: new Date('2024-01-20')
+    },
+    {
       id: '1',
       title: 'React Documentation',
       url: 'https://react.dev',

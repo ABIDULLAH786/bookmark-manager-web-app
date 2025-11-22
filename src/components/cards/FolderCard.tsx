@@ -1,21 +1,19 @@
 "use client"
-import React from 'react';
 import { Folder as FolderIcon, MoreVertical } from 'lucide-react';
 import { Card, CardContent } from './Card';
-import { Folder } from '@/types';
 import { useFolderNavigation } from '@/hook/useFolderNavigation';
 import { Button } from '../ui/button';
+import { IFolderClient } from '@/types/folder';
 
 interface FolderCardProps {
-  folder: Folder;
-  itemCount?: number;
+  folder: IFolderClient;
 }
 
-export function FolderCard({ folder, itemCount = 0 }: FolderCardProps) {
+export function FolderCard({ folder }: FolderCardProps) {
   const { goToFolder } = useFolderNavigation();
-
+  console.log({folder})
   return (
-    <Card className="group hover:shadow-md transition-all duration-200 cursor-pointer" onClick={() => goToFolder(folder?.id)}>
+    <Card className="group hover:shadow-md transition-all duration-200 cursor-pointer" onClick={() => goToFolder(folder?._id)}>
       <CardContent className="p-4">
         <div className="flex items-start justify-between mb-3">
           <div className="flex items-center gap-3">
@@ -25,7 +23,7 @@ export function FolderCard({ folder, itemCount = 0 }: FolderCardProps) {
             <div className="flex-1">
               <h3 className="font-medium">{folder.name}</h3>
               <p className="text-sm text-muted-foreground">
-                {itemCount} {itemCount === 1 ? 'item' : 'items'}
+                {folder?.counts?.totalItems} {folder?.counts?.totalItems === 1 ? 'item' : 'items'}
               </p>
             </div>
           </div>

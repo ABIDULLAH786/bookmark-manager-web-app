@@ -3,11 +3,10 @@
 import React, { createContext, useContext, useState } from "react";
 import { AddBookmarkModal } from "../modals/AddBookmarkModal";
 import { AddFolderModal } from "../modals/AddFolderModal";
-import { Bookmark, Folder } from "@/types";
 
 interface ModalContextType {
-  openAddBookmark: (onSubmit?: (data: Bookmark) => void) => void;
-  openAddFolder: (onSubmit?: (data: Folder) => void) => void;
+  openAddBookmark: (parentFolderId?: string) => void;
+  openAddFolder: (parentFolderId?: string) => void;
   closeModals: () => void;
 }
 
@@ -16,18 +15,15 @@ const ModalContext = createContext<ModalContextType | undefined>(undefined);
 export function ModalProvider({ children }: { children: React.ReactNode }) {
   const [showBookmarkModal, setShowBookmarkModal] = useState(false);
   const [showFolderModal, setShowFolderModal] = useState(false);
+  const [parentFolderId, setParentFolderId] = useState<string>("");
 
-  // Store dynamic callback
-  const [onBookmarkSubmit, setOnBookmarkSubmit] = useState<((data: Bookmark) => void) | undefined>(undefined);
-  const [onFolderSubmit, setOnFolderSubmit] = useState<((data: Folder) => void) | undefined>(undefined);
-
-  const openAddBookmark = (onSubmit?: (data: Bookmark) => void) => {
-    setOnBookmarkSubmit(() => onSubmit || undefined);
+  const openAddBookmark = (folderId?: string) => {
+    setParentFolderId(folderId || "");
     setShowBookmarkModal(true);
   };
 
-  const openAddFolder = (onSubmit?: (data: Folder) => void) => {
-    setOnFolderSubmit(() => onSubmit || undefined);
+  const openAddFolder = (folderId?: string) => {
+    setParentFolderId(folderId || "");
     setShowFolderModal(true);
   };
 
@@ -40,16 +36,17 @@ export function ModalProvider({ children }: { children: React.ReactNode }) {
     <ModalContext.Provider value={{ openAddBookmark, openAddFolder, closeModals }}>
       {children}
 
-      {/* Global Modals */}
+      {/* Global modals with internal API logic */}
       <AddBookmarkModal
         open={showBookmarkModal}
         onClose={closeModals}
-        onSubmit={onBookmarkSubmit}
+        parentFolderId={parentFolderId}
       />
+
       <AddFolderModal
         open={showFolderModal}
         onClose={closeModals}
-        onSubmit={onFolderSubmit}
+        parentFolderId={parentFolderId}
       />
     </ModalContext.Provider>
   );

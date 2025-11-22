@@ -19,7 +19,7 @@ export function BookmarkCard({ bookmark }: BookmarkCardProps) {
         <div className="flex items-start justify-between mb-3">
           <div className="flex items-center gap-3">
             <div className="w-8 h-8 rounded-lg bg-muted flex items-center justify-center text-lg">
-              {bookmark.favicon || '🔗'}
+              {bookmark?.icon || '🔗'}
             </div>
             <div className="flex-1 min-w-0">
               <h3 className="font-medium truncate">{bookmark.title}</h3>

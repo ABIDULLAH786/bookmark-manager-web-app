@@ -1,22 +1,22 @@
 "use client"
 import React, { useState } from 'react';
 import { ChevronDown, ChevronRight, Folder as FolderIcon, Home } from 'lucide-react';
-import { Folder } from '@/types';
 import { Button } from './ui/button';
 import { useFolderNavigation } from '@/hook/useFolderNavigation';
+import { IFolderClient } from '@/types/folder';
 
 interface FolderTreeProps {
-  folders: Folder[];
+  folders: IFolderClient[];
   currentFolderId?: string;
 }
 
 interface TreeNodeProps {
-  folder: Folder;
-  children: Folder[];
+  folder: IFolderClient;
+  children: IFolderClient[];
   level: number;
   currentFolderId?: string;
-  expandedFolders: Set<string>;
-  toggleExpanded: (folderId: string) => void;
+  expandedFolders: Set<string | undefined>;
+  toggleExpanded: (folderId: string | undefined) => void;
 }
 
 function TreeNode({
@@ -27,8 +27,10 @@ function TreeNode({
   expandedFolders,
   toggleExpanded
 }: TreeNodeProps) {
-  const isExpanded = expandedFolders.has(folder.id);
-  const isSelected = currentFolderId === folder.id;
+  console.log({ expandedFolders })
+  console.log({ folder })
+  const isExpanded = expandedFolders.has(folder._id);
+  const isSelected = currentFolderId === folder._id;
   const hasChildren = children.length > 0;
   const { goToFolder } = useFolderNavigation();
   return (
@@ -37,14 +39,14 @@ function TreeNode({
         variant={isSelected ? "secondary" : "ghost"}
         className="w-full justify-start h-auto p-2 font-normal"
         style={{ paddingLeft: `${8 + level * 16}px` }}
-      onClick={() => goToFolder(folder.id)}
+        onClick={() => goToFolder(folder._id)}
       >
         <div className="flex items-center gap-2 w-full">
           {hasChildren && (
             <span
               onClick={(e) => {
                 e.stopPropagation();
-                toggleExpanded(folder.id);
+                toggleExpanded(folder._id);
               }}
               className="p-0.5 hover:bg-accent rounded-sm"
             >
@@ -63,10 +65,10 @@ function TreeNode({
       {hasChildren && isExpanded && (
         <div>
           {children.map((childFolder) => {
-            const grandChildren = folder.id ? [] : []; // Simplified for this demo
+            const grandChildren = folder._id ? [] : []; // Simplified for this demo
             return (
               <TreeNode
-                key={childFolder.id}
+                key={childFolder._id}
                 folder={childFolder}
                 // children={grandChildren}
                 level={level + 1}
@@ -83,9 +85,10 @@ function TreeNode({
 }
 
 export function FolderTree({ folders, currentFolderId }: FolderTreeProps) {
-  const [expandedFolders, setExpandedFolders] = useState<Set<string>>(new Set(['1']));
+  const [expandedFolders, setExpandedFolders] = useState<Set<string | undefined>>(new Set());
 
-  const toggleExpanded = (folderId: string) => {
+  const toggleExpanded = (folderId: string | undefined) => {
+    if (!folderId) return;
     const newExpanded = new Set(expandedFolders);
     if (newExpanded.has(folderId)) {
       newExpanded.delete(folderId);
@@ -94,8 +97,6 @@ export function FolderTree({ folders, currentFolderId }: FolderTreeProps) {
     }
     setExpandedFolders(newExpanded);
   };
-
-  const rootFolders = folders?.filter(f => !f.parentId);
 
   return (
     <div className="space-y-1">
@@ -110,11 +111,11 @@ export function FolderTree({ folders, currentFolderId }: FolderTreeProps) {
         </div>
       </Button>
 
-      {rootFolders?.map((folder) => {
-        const children = folders.filter(f => f.parentId === folder.id);
+      {folders?.map((folder) => {
+        const children = folders.filter(f => f.parentFolder === folder._id);
         return (
           <TreeNode
-            key={folder.id}
+            key={folder._id}
             folder={folder}
             // children={children}
             level={0}

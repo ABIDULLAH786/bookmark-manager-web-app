@@ -1,13 +1,16 @@
 "use client";
 
-import React, { useState } from 'react';
 import { FolderTree } from '@/components/FolderTree';
 import { FolderCard } from '@/components/cards/FolderCard';
 import { AddCard } from '@/components/cards/AddCard';
 import { BookmarkCard } from '@/components/cards/BookmarkCard';
 import { mockData } from '@/data/mockData';
-import { Bookmark, Folder } from '@/types';
+
 import { useModal } from '@/components/providers/ModalProvider';
+import useSWR from 'swr';
+import { fetcher } from '@/helper/fetcher';
+import { IFolderClient } from '@/types/folder';
+import { IBookmarkClient } from '@/types/bookmark';
 
 interface FolderPageClientProps {
     id: string;
@@ -15,54 +18,21 @@ interface FolderPageClientProps {
 
 export default function FolderPageClient({ id }: FolderPageClientProps) {
     const currentFolderId = id;
-    const [folders, setFolders] = useState<Folder[]>(mockData.folders);
-    const [bookmarks, setBookmarks] = useState<Bookmark[]>(mockData.bookmarks);
-
+    const { data: rootFolders, error: rootFolderError, isLoading: rootFolderLoading } = useSWR(["/api/folders/", {}], fetcher);
+    const { data: folder, error: folderError, isLoading: folderLoading } = useSWR(["/api/folders/" + id, {}], fetcher);
+    const { data: bookmarks, error: bookmarksError, isLoading: bookmarksLoading } = useSWR(["/api/bookmarks/" + id, {}], fetcher);
+    console.log({ folder })
+    console.log({ bookmarks })
     const { openAddFolder, openAddBookmark } = useModal();
 
 
-    const currentFolder = folders?.find(f => f.id === currentFolderId);
-    const subfolders = folders?.filter(f => f.parentId === currentFolderId);
-    const folderBookmarks = bookmarks?.filter(b => b.folderId === currentFolderId);
-    const rootBookmarks = currentFolderId ? [] : bookmarks?.filter(b => !b.folderId);
-    const allDisplayBookmarks = currentFolderId ? folderBookmarks : rootBookmarks;
-
-    const getFolderItemCount = (folderId: string) => {
-        const subfolderCount = mockData?.folders.filter(f => f.parentId === folderId).length;
-        const bookmarkCount = mockData?.bookmarks.filter(b => b.folderId === folderId).length;
-        return subfolderCount + bookmarkCount;
-    };
-
-    const handleAddFolder = (folder: Folder) => {
-        const newFolder: Folder = {
-            id: folder.id,
-            name: folder.name,
-            description: folder.description,
-            parentId: currentFolderId || undefined,
-            createdAt: new Date()
-        };
-        setFolders([...folders, newFolder]);
-    };
-
-    const handleAddBookmark = (bookmark: Bookmark) => {
-        const newBookmark: Bookmark = {
-            id: bookmark.id,
-            title: bookmark.title,
-            url: bookmark.url,
-            description: bookmark.description,
-            folderId: currentFolderId || undefined,
-            favicon: '🔗',
-            createdAt: new Date()
-        };
-        setBookmarks([...bookmarks, newBookmark]);
-    };
     return (
         <div className="flex h-[calc(100vh-80px)]">
             {/* Sidebar */}
             <div className="w-64 border-r bg-card p-4 overflow-y-auto">
                 <h3 className="font-semibold mb-4">Folders</h3>
                 <FolderTree
-                    folders={mockData?.folders}
+                    folders={rootFolders}
                     currentFolderId={currentFolderId}
                 />
             </div>
@@ -74,10 +44,10 @@ export default function FolderPageClient({ id }: FolderPageClientProps) {
 
                         <div className="mb-8">
                             <h2 className="text-2xl font-semibold mb-2">
-                                {currentFolder ? currentFolder.name : 'All Bookmarks'}
+                                {folder ? folder.name : 'All Bookmarks'}
                             </h2>
-                            {currentFolder?.description && (
-                                <p className="text-muted-foreground">{currentFolder.description}</p>
+                            {folder?.description && (
+                                <p className="text-muted-foreground">{folder.description}</p>
                             )}
 
                         </div>
@@ -90,16 +60,14 @@ export default function FolderPageClient({ id }: FolderPageClientProps) {
                     </div>
 
                     {/* Subfolders */}
-                    {subfolders?.length > 0 && (
+                    {folder?.subfolders?.length > 0 && (
                         <div className="mb-8">
                             <h3 className="text-lg font-medium mb-4">Folders</h3>
                             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                                {subfolders?.map(folder => (
+                                {folder?.subfolders?.map((folder: IFolderClient) => (
                                     <FolderCard
-                                        key={folder.id}
+                                        key={folder._id}
                                         folder={folder}
-                                        // TODO: add the folder item count in the folder folder model so that no need to do the same and on new folder in that case update the parent folder coundif any
-                                        itemCount={getFolderItemCount(folder.id)}
                                     />
                                 ))}
                             </div>
@@ -109,14 +77,14 @@ export default function FolderPageClient({ id }: FolderPageClientProps) {
                     {/* Bookmarks */}
                     <div className="mb-8">
                         <h3 className="text-lg font-medium mb-4">
-                            {currentFolder ? 'Bookmarks in this folder' : 'Recent Bookmarks'}
+                            {folder ? 'Bookmarks in this folder' : 'Recent Bookmarks'}
                         </h3>
                         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                            <AddCard type="folder" onClick={() => openAddFolder(handleAddFolder)} />
-                            <AddCard type="bookmark" onClick={() => openAddBookmark(handleAddBookmark)} />
+                            <AddCard type="folder" onClick={() => openAddFolder(id)} />
+                            <AddCard type="bookmark" onClick={() => openAddBookmark(id)} />
 
-                            {allDisplayBookmarks?.map(bookmark => (
-                                <BookmarkCard key={bookmark.id} bookmark={bookmark} />
+                            {bookmarks?.map((bookmark: IBookmarkClient) => (
+                                <BookmarkCard key={bookmark._id} bookmark={bookmark} />
                             ))}
                         </div>
                     </div>

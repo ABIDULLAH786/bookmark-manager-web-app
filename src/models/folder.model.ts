@@ -5,7 +5,7 @@ export interface IFolder {
     name: string;
     description?: string;
     icon?: string;
-    createdBy: Types.ObjectId;
+    createdBy?: Types.ObjectId;
 
     parentFolder?: Types.ObjectId;
     subFolders?: Types.ObjectId[];

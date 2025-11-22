@@ -4,30 +4,65 @@ import { Label } from '@radix-ui/react-label';
 import { Input } from '../ui/input';
 import { Button } from '../ui/button';
 import { Textarea } from '../ui/textarea';
-import { Folder } from '@/types';
+import { IFolderClient } from '@/types/folder';
+import { mutate } from 'swr';
+import { fetcher } from '@/helper/fetcher';
+import { IError } from '@/types/error';
 
 interface AddFolderModalProps {
   open: boolean;
   onClose: () => void;
   // onSubmit: (name: string, description: string) => void;
-  onSubmit?: (data: Folder) => void;
-
+  // onSubmit?: (data: IFolderClient) => void;
+  parentFolderId: string;
 }
 
-export function AddFolderModal({ open, onClose, onSubmit }: AddFolderModalProps) {
+export function AddFolderModal({ open, onClose, parentFolderId }: AddFolderModalProps) {
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!name.trim()) return;
+    setLoading(true);
+    try {
+      const res = await fetcher([
+        "/api/folders",
+        {
+          method: "POST",
+          body: {
+            name,
+            description,
+            parentFolder: parentFolderId,
+            createdAt: new Date(),
+            createdBy: "68f78b4cc6f131811e4f01b2" // TODO: replace with real loggedin user ID
+          },
+        },
+      ]);
+      console.log("response: ", res);
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (name.trim()) {
-      // onSubmit(name.trim(), description.trim());
 
-      const newFolder = { id: Date.now().toString(), name: name.trim(), description: description.trim(), createdAt: new Date() };
-      if (onSubmit) onSubmit(newFolder);
-      setName('');
-      setDescription('');
+      // optional: refresh folders via SWR
+      // mutate(parentFolderId ? `/api/folders/${parentFolderId}` : "/api/folders");
+
+      setName("");
+      setDescription("");
       onClose();
+      // return
+      if (name.trim()) {
+        // onSubmit(name.trim(), description.trim());
+
+        // const newFolder = { id: Date.now().toString(), name: name.trim(), description: description.trim(), createdAt: new Date() };
+        setName('');
+        setDescription('');
+        onClose();
+      }
+    } catch (err: IError | any) {
+      console.log("Error body:", err.body);
+      setErrorMsg(err?.body?.errors[0] ?? err.body.message);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -35,6 +70,7 @@ export function AddFolderModal({ open, onClose, onSubmit }: AddFolderModalProps)
     setName('');
     setDescription('');
     onClose();
+    setErrorMsg(null);
   };
 
   return (
@@ -64,13 +100,18 @@ export function AddFolderModal({ open, onClose, onSubmit }: AddFolderModalProps)
               rows={3}
             />
           </div>
-          <DialogFooter>
-            <Button type="button" variant="outline" onClick={handleClose}>
-              Cancel
-            </Button>
-            <Button type="submit" disabled={!name.trim()}>
-              Create Folder
-            </Button>
+          <DialogFooter className='flex items-center justify-between!'>
+            <div className=''>
+              {errorMsg && <p className="text-red-500 text-sm font-semibold">{errorMsg}</p>}
+            </div>
+            <div>
+              <Button type="button" variant="outline" onClick={handleClose}>
+                Cancel
+              </Button>
+              <Button type="submit" disabled={!name.trim()}>
+                {loading ? "Creating..." : "Create Folder"}
+              </Button>
+            </div>
           </DialogFooter>
         </form>
       </DialogContent>

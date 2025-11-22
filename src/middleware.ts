@@ -1,5 +1,6 @@
 import { withAuth } from "next-auth/middleware";
 import { NextResponse } from "next/server";
+import path from "path";
 
 export default withAuth(
   // This 'middleware' function runs ONLY if 'authorized' returns true.
@@ -30,7 +31,8 @@ export default withAuth(
         if (
           pathname.startsWith("/api/auth") ||
           pathname === "/login" ||
-          pathname === "/register"
+          pathname === "/register" ||
+          pathname.startsWith("/api")
         )
           return true;
 

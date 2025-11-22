@@ -2,31 +2,61 @@ import React, { useState } from 'react';
 import { Textarea } from '../ui/textarea';
 import { Input } from '../ui/input';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '../ui/dialog';
-import { Bookmark } from '@/types';
 import { Button } from '../ui/button';
 import { Label } from '../ui/label';
+import { IBookmarkClient } from '@/types/bookmark';
+import { mutate } from 'swr';
+import { fetcher } from '@/helper/fetcher';
+import { IError } from '@/types/error';
 
 interface AddBookmarkModalProps {
   open: boolean;
   onClose: () => void;
-  onSubmit?: (data: Bookmark) => void;
+  // onSubmit?: (data: IBookmarkClient) => void;
   // onSubmit: (title: string, url: string, description: string) => void;
+  parentFolderId: string;
 }
 
-export function AddBookmarkModal({ open, onClose, onSubmit }: AddBookmarkModalProps) {
+export function AddBookmarkModal({ open, onClose, parentFolderId }: AddBookmarkModalProps) {
   const [title, setTitle] = useState('');
   const [url, setUrl] = useState('');
   const [description, setDescription] = useState('');
-
-  const handleSubmit = (e: React.FormEvent) => {
+  const [loading, setLoading] = useState(false);
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const handleCreateBookmark = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (title.trim() && url.trim()) {
-      const newBookmark = {id: Date.now().toString(), title: title.trim(), url: url.trim(), description: description.trim(), createdAt: new Date()};
-      if (onSubmit) onSubmit(newBookmark);
-      setTitle('');
-      setUrl('');
-      setDescription('');
+    if (!title.trim() || !url.trim()) return;
+    setLoading(true);
+    try {
+      await fetcher([
+        "/api/bookmarks",
+        {
+          method: "POST",
+          body: {
+            title,
+            url,
+            description,
+            parentFolder: parentFolderId,
+            createdAt: new Date(),
+            createdBy: "68f78b4cc6f131811e4f01b2" // TODO: replace with real loggedin user ID
+
+          },
+        },
+      ]);
+
+      mutate(parentFolderId ? `/api/bookmarks/${parentFolderId}` : "/api/bookmarks");
+
+      setTitle("");
+      setUrl("");
+      setDescription("");
       onClose();
+    } catch (err: IError | any) {
+      console.log("Error creating bookmark:", err);
+      console.log("Error body:", err.body);
+      setErrorMsg(err?.body?.errors[0] ?? err.body.message);
+
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -43,7 +73,8 @@ export function AddBookmarkModal({ open, onClose, onSubmit }: AddBookmarkModalPr
         <DialogHeader>
           <DialogTitle>Add New Bookmark</DialogTitle>
         </DialogHeader>
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleCreateBookmark} className="space-y-4 : React.FormEventespace-y-4
+        e.preventDefault();">
           <div className="space-y-2">
             <Label htmlFor="bookmark-title">Title *</Label>
             <Input
@@ -75,13 +106,18 @@ export function AddBookmarkModal({ open, onClose, onSubmit }: AddBookmarkModalPr
               rows={3}
             />
           </div>
-          <DialogFooter>
-            <Button type="button" variant="outline" onClick={handleClose}>
-              Cancel
-            </Button>
-            <Button type="submit" disabled={!title.trim() || !url.trim()}>
-              Save Bookmark
-            </Button>
+          <DialogFooter className='flex items-center justify-between!'>
+            <div className=''>
+              {errorMsg && <p className="text-red-500 text-sm font-semibold">{errorMsg}</p>}
+            </div>
+            <div>
+              <Button type="button" variant="outline" onClick={handleClose}>
+                Cancel
+              </Button>
+              <Button type="submit" disabled={!title.trim() || !url.trim()}>
+                {loading ? "Saving..." : "Save Bookmark"}
+              </Button>
+            </div>
           </DialogFooter>
         </form>
       </DialogContent>

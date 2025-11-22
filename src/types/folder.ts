@@ -16,6 +16,10 @@ export interface IFolderClient {
 
   createdAt?: string | Date;
   updatedAt?: string | Date;
+
+
+  counts?: any; // used to display the count items in folder card, that shows the nested items in that specific folder
+
 }
 
 export interface FolderData {
