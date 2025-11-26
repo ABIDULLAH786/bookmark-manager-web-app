@@ -1,11 +1,11 @@
 import { apiError } from "@/lib/apiError";
 import { connectToDatabase } from "@/lib/db";
-import Bookmark from "@/models/bookmark.model";
+import bookmarkModel from "@/models/bookmark.model";
 import { NextResponse } from "next/server";
 
 export async function GET() {
   await connectToDatabase();
-  const bookmarks = await Bookmark.find({ parentFolder: null }).sort({ createdAt: -1 });
+  const bookmarks = await bookmarkModel.find({ parentFolder: null }).sort({ createdAt: -1 });
   return NextResponse.json(bookmarks);
 }
 
@@ -14,7 +14,7 @@ export async function POST(req: Request) {
 
     await connectToDatabase();
     const data = await req.json();
-    const bookmark = await Bookmark.create(data);
+    const bookmark = await bookmarkModel.create(data);
     return NextResponse.json(bookmark);
   } catch (err: any) {
     console.log("err.name: ", err.name)

@@ -1,6 +1,6 @@
 import mongoose, { Schema, Types } from "mongoose";
 
-export interface IFolder {
+export interface IFolderModle {
     _id?: mongoose.Types.ObjectId;
     name: string;
     description?: string;
@@ -15,7 +15,7 @@ export interface IFolder {
     isFavoriteBy?: Types.ObjectId[];
 }
 
-const folderSchema = new Schema<IFolder>(
+const FolderSchema = new Schema<IFolderModle>(
     {
         name: { type: String, required: true },
         description: { type: String },
@@ -32,4 +32,4 @@ const folderSchema = new Schema<IFolder>(
     { timestamps: true }
 );
 
-export default mongoose.models.Folder || mongoose.model<IFolder>("Folder", folderSchema);
+export default mongoose.models.FolderModel || mongoose.model<IFolderModle>("Folder", FolderSchema);

@@ -1,20 +1,20 @@
 import { connectToDatabase } from "@/lib/db";
-import Folder from "@/models/folder.model";
 import Bookmark from "@/models/bookmark.model";
 import { NextResponse } from "next/server";
 import { apiError } from "@/lib/apiError";
+import folderModel from "@/models/folder.model";
 
 export async function GET() {
   await connectToDatabase();
 
   // Get all root folders (no parent)
-  const folders = await Folder.find({ parentFolder: null }).sort({ createdAt: -1 }).lean();
+  const folders = await folderModel.find({ parentFolder: null }).sort({ createdAt: -1 }).lean();
 
   // Use Promise.all with map (not forEach)
   const formattedFolders = await Promise.all(
     folders.map(async (folder) => {
       // Find subfolders directly under this folder
-      const subfolders = await Folder.find({ parentFolder: folder._id }).lean();
+      const subfolders = await folderModel.find({ parentFolder: folder._id }).lean();
 
       // Find bookmarks in this folder
       const bookmarks = await Bookmark.find({ parentFolder: folder._id }).lean();
@@ -40,7 +40,7 @@ export async function POST(req: Request) {
     await connectToDatabase();
     const body = await req.json();
     console.log({ ...body })
-    const folder = await Folder.create(body);
+    const folder = await folderModel.create(body);
     return NextResponse.json(folder);
   } catch (err: any) {
     console.error("Error creating folder:", err);

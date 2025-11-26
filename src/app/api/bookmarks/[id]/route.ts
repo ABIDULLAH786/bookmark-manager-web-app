@@ -1,8 +1,8 @@
 import { connectToDatabase } from "@/lib/db";
-import Folder from "@/models/folder.model";
-import Bookmark from "@/models/bookmark.model";
 import { NextResponse } from "next/server";
 import { apiError } from "@/lib/apiError";
+import bookmarkModel from "@/models/bookmark.model";
+import folderModel from "@/models/folder.model";
 
 interface Params {
   params: { id: string };
@@ -13,7 +13,7 @@ export async function GET(req: Request, { params }: Params) {
   await connectToDatabase();
   const { id } = await params;
 
-  const bookmarks = await Bookmark.find({ parentFolder: id }).sort({ createdAt: -1 });
+  const bookmarks = await bookmarkModel.find({ parentFolder: id }).sort({ createdAt: -1 });
   return NextResponse.json(bookmarks);
 }
 
@@ -32,7 +32,7 @@ export async function POST(req: Request, { params }: Params) {
     }
 
     // ✅ Optional: check if parent folder exists
-    const parentFolder = await Folder.findById(parentFolderId);
+    const parentFolder = await folderModel.findById(parentFolderId);
     if (!parentFolder) {
       return NextResponse.json(
         { message: "Parent folder not found" },
@@ -41,7 +41,7 @@ export async function POST(req: Request, { params }: Params) {
     }
 
     // ✅ Create the bookmark
-    const newBookmark = await Bookmark.create({
+    const newBookmark = await bookmarkModel.create({
       title: body.title,
       url: body.url,
       description: body.description || "",
@@ -70,7 +70,7 @@ export async function PUT(req: Request, { params }: Params) {
   const { id } = await params;
 
   const data = await req.json();
-  const updated = await Bookmark.findByIdAndUpdate(id, data, { new: true });
+  const updated = await bookmarkModel.findByIdAndUpdate(id, data, { new: true });
   return NextResponse.json(updated);
 }
 
@@ -80,6 +80,6 @@ export async function DELETE(req: Request, { params }: Params) {
   const { id } = await params;
 
   await connectToDatabase();
-  await Bookmark.findByIdAndDelete(id);
+  await bookmarkModel.findByIdAndDelete(id);
   return NextResponse.json({ message: "Bookmark deleted" });
 }
