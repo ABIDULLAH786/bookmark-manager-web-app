@@ -8,20 +8,26 @@ import { IFolderClient } from '@/types/folder';
 import { mutate } from 'swr';
 import { fetcher } from '@/helper/fetcher';
 import { IError } from '@/types/error';
+import { useFoldersStore } from '@/store/folders.store';
 
 interface AddFolderModalProps {
   open: boolean;
   onClose: () => void;
   // onSubmit: (name: string, description: string) => void;
   // onSubmit?: (data: IFolderClient) => void;
-  parentFolderId: string;
+  parentFolderId?: string;
 }
 
 export function AddFolderModal({ open, onClose, parentFolderId }: AddFolderModalProps) {
+
+  const {addFolder} = useFoldersStore();
+
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
+
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!name.trim()) return;
@@ -40,9 +46,9 @@ export function AddFolderModal({ open, onClose, parentFolderId }: AddFolderModal
           },
         },
       ]);
-      console.log("response: ", res);
-
-
+      console.log("Folder added: ", res);
+      
+      addFolder(res);
       // optional: refresh folders via SWR
       // mutate(parentFolderId ? `/api/folders/${parentFolderId}` : "/api/folders");
 

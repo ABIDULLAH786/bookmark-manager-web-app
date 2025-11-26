@@ -14,7 +14,7 @@ interface AddBookmarkModalProps {
   onClose: () => void;
   // onSubmit?: (data: IBookmarkClient) => void;
   // onSubmit: (title: string, url: string, description: string) => void;
-  parentFolderId: string;
+  parentFolderId?: string;
 }
 
 export function AddBookmarkModal({ open, onClose, parentFolderId }: AddBookmarkModalProps) {
