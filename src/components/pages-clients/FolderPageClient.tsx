@@ -1,6 +1,5 @@
 "use client";
 
-import { FolderTree } from '@/components/FolderTree';
 import { FolderCard } from '@/components/cards/FolderCard';
 import { AddCard } from '@/components/cards/AddCard';
 import { BookmarkCard } from '@/components/cards/BookmarkCard';
@@ -11,13 +10,13 @@ import useSWR from 'swr';
 import { fetcher } from '@/helper/fetcher';
 import { IFolderClient } from '@/types/folder';
 import { IBookmarkClient } from '@/types/bookmark';
+import FolderTree from '../FolderTree';
 
 interface FolderPageClientProps {
     id: string;
 }
 
 export default function FolderPageClient({ id }: FolderPageClientProps) {
-    const currentFolderId = id;
     const { data: rootFolders, error: rootFolderError, isLoading: rootFolderLoading } = useSWR(["/api/folders/", {}], fetcher);
     const { data: folder, error: folderError, isLoading: folderLoading } = useSWR(["/api/folders/" + id, {}], fetcher);
     const { data: bookmarks, error: bookmarksError, isLoading: bookmarksLoading } = useSWR(["/api/bookmarks/" + id, {}], fetcher);
@@ -29,13 +28,12 @@ export default function FolderPageClient({ id }: FolderPageClientProps) {
     return (
         <div className="flex h-[calc(100vh-80px)]">
             {/* Sidebar */}
-            <div className="w-64 border-r bg-card p-4 overflow-y-auto">
-                <h3 className="font-semibold mb-4">Folders</h3>
+            {/* <div className="w-64  bg-card p-4 overflow-y-auto"> */}
                 <FolderTree
-                    folders={rootFolders}
-                    currentFolderId={currentFolderId}
+                    // folders={rootFolders}
+                    // currentFolderId={currentFolderId}
                 />
-            </div>
+            {/* </div> */}
 
             {/* Main Content */}
             <div className="flex-1 overflow-y-auto">

@@ -14,7 +14,8 @@ export async function GET(req: Request, { params }: Params) {
   const { id } = await params;
 
   const bookmarks = await bookmarkModel.find({ parentFolder: id }).sort({ createdAt: -1 });
-  return NextResponse.json(bookmarks);
+    return NextResponse.json({ success: true, data:bookmarks, message: "Bookmark Data fetched successfully" }, { status: 200 });
+
 }
 
 export async function POST(req: Request, { params }: Params) {
@@ -50,7 +51,8 @@ export async function POST(req: Request, { params }: Params) {
       createdAt: new Date(),
     });
 
-    return NextResponse.json(newBookmark, { status: 201 });
+    return NextResponse.json({ success: true, data: newBookmark }, { status: 201 });
+    
   } catch (err: any) {
     console.log("err.name: ", err.name)
     // Mongoose validation errors
@@ -71,7 +73,8 @@ export async function PUT(req: Request, { params }: Params) {
 
   const data = await req.json();
   const updated = await bookmarkModel.findByIdAndUpdate(id, data, { new: true });
-  return NextResponse.json(updated);
+    return NextResponse.json({ success: true, data: updated, message: "Bookmark created successfully" }, { status: 200 });
+
 }
 
 
@@ -81,5 +84,6 @@ export async function DELETE(req: Request, { params }: Params) {
 
   await connectToDatabase();
   await bookmarkModel.findByIdAndDelete(id);
-  return NextResponse.json({ message: "Bookmark deleted" });
+    return NextResponse.json({ success: true, message: "Bookmark deleted successfully" }, { status: 200 });
+
 }

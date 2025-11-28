@@ -1,28 +1,77 @@
-import { connectToDatabase } from "@/lib/db";
-import bookmarkModel from "@/models/bookmark.model";
-import folderModel from "@/models/folder.model";
 import { NextResponse } from "next/server";
+import mongoose from "mongoose";
+import FolderModel from "@/models/folder.model";
+import { USER_ID } from "@/constants";
+// import { getServerSession } from "next-auth"; 
 
-export async function GET() {
-  await connectToDatabase();
+// Helper function to build tree from flat array
+const buildFolderTree = (folders: any[]) => {
+  const folderMap = new Map();
+  const roots: any[] = [];
 
-  // Get all root folders (no parent)
-  const folders = await folderModel.find({ parentFolder: null }).sort({ createdAt: -1 }).lean();
+  // 1. Initialize all folders in a map
+  folders.forEach((folder) => {
+    // FIX: Removed .toObject() because .lean() returns plain objects already
+    folderMap.set(folder._id.toString(), { 
+      ...folder, 
+      children: [] 
+    });
+  });
 
-  // Use Promise.all with map (not forEach)
-  const formattedFolders = await Promise.all(
-    folders.map(async (folder) => {
-      // Find subfolders directly under this folder
-      const subfolders = await folderModel.find({ parentFolder: folder._id }).lean();
+  // 2. Link children to parents
+  folders.forEach((folder) => {
+    const folderId = folder._id.toString();
+    const mappedFolder = folderMap.get(folderId);
 
-      
-      return {
-        ...folder,
-        subfolders,
-       
-      };
+    if (folder.parentFolder) {
+      const parentId = folder.parentFolder.toString();
+      // Check if parent exists in the fetched set (it might not if we only fetched a subset or if parent is deleted)
+      if (folderMap.has(parentId)) {
+        folderMap.get(parentId).children.push(mappedFolder);
+      } else {
+        // If parent isn't found (orphan or root in this context), treat as root
+        roots.push(mappedFolder);
+      }
+    } else {
+      // If no parent, it is a root folder
+      roots.push(mappedFolder);
+    }
+  });
+
+  return roots;
+};
+
+export async function GET(req: Request) {
+  try {
+    // 1. Connect DB
+    if (mongoose.connection.readyState === 0) {
+        await mongoose.connect(process.env.MONGODB_URI!);
+    }
+
+    // 2. Get User ID (Mocked here, replace with actual session logic)
+    // const session = await getServerSession(authOptions);
+    // const userId = session?.user?.id;
+    const userId = USER_ID; 
+
+    if (!userId) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    // 3. OPTIMIZED FETCH: Get ALL folders for this user in ONE query.
+    const allFolders = await FolderModel.find({ 
+      createdBy: userId 
     })
-  );
+    .select("_id name description icon parentFolder subFolders") 
+    .lean() // Returns plain JS objects (faster, but no .toObject() method)
+    .exec();
 
-  return NextResponse.json(formattedFolders);
+    // 4. Construct the tree in memory
+    const folderTree = buildFolderTree(allFolders);
+
+    return NextResponse.json({ success: true, data: folderTree });
+
+  } catch (error) {
+    console.error("Folder Fetch Error:", error);
+    return NextResponse.json({ success: false, error: "Server Error" }, { status: 500 });
+  }
 }

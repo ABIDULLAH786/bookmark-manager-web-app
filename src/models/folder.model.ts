@@ -32,4 +32,6 @@ const FolderSchema = new Schema<IFolderModle>(
     { timestamps: true }
 );
 
-export default mongoose.models.FolderModel || mongoose.model<IFolderModle>("Folder", FolderSchema);
+const FolderModel =  mongoose.models.Folder || mongoose.model<IFolderModle>("Folder", FolderSchema);
+
+export default FolderModel;

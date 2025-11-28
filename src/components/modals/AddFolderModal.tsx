@@ -9,6 +9,7 @@ import { mutate } from 'swr';
 import { fetcher } from '@/helper/fetcher';
 import { IError } from '@/types/error';
 import { useFoldersStore } from '@/store/folders.store';
+import { USER_ID } from '@/constants';
 
 interface AddFolderModalProps {
   open: boolean;
@@ -42,7 +43,7 @@ export function AddFolderModal({ open, onClose, parentFolderId }: AddFolderModal
             description,
             parentFolder: parentFolderId,
             createdAt: new Date(),
-            createdBy: "68f78b4cc6f131811e4f01b2" // TODO: replace with real loggedin user ID
+            createdBy: USER_ID // TODO: replace with real loggedin user ID
           },
         },
       ]);

@@ -6,7 +6,8 @@ import { NextResponse } from "next/server";
 export async function GET() {
   await connectToDatabase();
   const bookmarks = await bookmarkModel.find({ parentFolder: null }).sort({ createdAt: -1 });
-  return NextResponse.json(bookmarks);
+    return NextResponse.json({ success: true, data:bookmarks, message: "Bookmarks Data fetched successfully" }, { status: 200 });
+  
 }
 
 export async function POST(req: Request) {
@@ -15,7 +16,8 @@ export async function POST(req: Request) {
     await connectToDatabase();
     const data = await req.json();
     const bookmark = await bookmarkModel.create(data);
-    return NextResponse.json(bookmark);
+    return NextResponse.json({ success: true, data:bookmark, message: "Bookmark created successfully" }, { status: 201 });
+
   } catch (err: any) {
     console.log("err.name: ", err.name)
     // Mongoose validation errors

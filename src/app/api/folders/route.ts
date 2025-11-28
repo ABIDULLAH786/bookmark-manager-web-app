@@ -32,7 +32,8 @@ export async function GET() {
     })
   );
 
-  return NextResponse.json(formattedFolders);
+        return NextResponse.json({ success: true, data:formattedFolders, message: "Folder Data fetched successfully" }, { status: 200 });
+
 }
 
 export async function POST(req: Request) {
@@ -41,7 +42,8 @@ export async function POST(req: Request) {
     const body = await req.json();
     console.log({ ...body })
     const folder = await folderModel.create(body);
-    return NextResponse.json(folder);
+        return NextResponse.json({ success: true, data:folder, message: "Folder created successfully" }, { status: 200 });
+
   } catch (err: any) {
     console.error("Error creating folder:", err);
 

@@ -59,7 +59,8 @@ export async function GET(req: Request, { params }: Params) {
     },
   };
 
-  return NextResponse.json(folderWithCounts);
+      return NextResponse.json({ success: true, data:folderWithCounts, message: "Folder Data fetched successfully" }, { status: 200 });
+  
 }
 
 export async function POST(req: Request, { params }: Params) {
@@ -93,8 +94,8 @@ export async function POST(req: Request, { params }: Params) {
       parentFolder: parentFolderId, // ✅ link to parent
       createdAt: new Date(),
     });
+      return NextResponse.json({ success: true, data:newFolder, message: "Folder created successfully" }, { status: 201 });
 
-    return NextResponse.json(newFolder, { status: 201 });
   } catch (err: any) {
     console.error("Error creating folder:", err);
     console.log("err.name: ", err.name)
@@ -116,7 +117,8 @@ export async function PUT(req: Request, { params }: Params) {
   const data = await req.json();
 
   const updated = await Folder.findByIdAndUpdate(params.id, data, { new: true });
-  return NextResponse.json(updated);
+        return NextResponse.json({ success: true, data:updated, message: "Folder updated successfully" }, { status: 200 });
+
 }
 
 // ✅ DELETE — Delete folder

@@ -8,6 +8,7 @@ import { IBookmarkClient } from '@/types/bookmark';
 import { mutate } from 'swr';
 import { fetcher } from '@/helper/fetcher';
 import { IError } from '@/types/error';
+import { USER_ID } from '@/constants';
 
 interface AddBookmarkModalProps {
   open: boolean;
@@ -38,7 +39,7 @@ export function AddBookmarkModal({ open, onClose, parentFolderId }: AddBookmarkM
             description,
             parentFolder: parentFolderId,
             createdAt: new Date(),
-            createdBy: "68f78b4cc6f131811e4f01b2" // TODO: replace with real loggedin user ID
+            createdBy: USER_ID // TODO: replace with real loggedin user ID
 
           },
         },

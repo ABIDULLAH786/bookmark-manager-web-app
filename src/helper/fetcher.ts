@@ -36,8 +36,8 @@ export const fetcher = async (key: [string, FetchOptions?]): Promise<any> => {
         body: errorBody,
       };
     }
-
-    return await res.json();
+    const {data} = await res.json();
+    return data;
   } catch (error) {
     console.error("Fetcher Error:", error);
     throw error;
