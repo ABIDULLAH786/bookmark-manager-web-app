@@ -1,12 +1,12 @@
-import { Bookmark, Folder } from '@/types';
 import React from 'react';
 import { AddCard } from './cards/AddCard';
 import { FolderCard } from './cards/FolderCard';
 import { BookmarkCard } from './cards/BookmarkCard';
+import { IBookmarkClient, IFolderClient } from '@/types';
 
 interface HomepageProps {
-  folders: Folder[];
-  bookmarks: Bookmark[];
+  folders: IFolderClient[];
+  bookmarks: IBookmarkClient[];
   onAddFolder: () => void;
   onAddBookmark: () => void;
 }

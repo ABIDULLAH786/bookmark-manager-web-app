@@ -1,130 +1,155 @@
-"use client"
+'use client'
 import React, { useState } from 'react';
-import { ChevronDown, ChevronRight, Folder as FolderIcon, Home } from 'lucide-react';
-import { Button } from './ui/button';
-import { useFolderNavigation } from '@/hook/useFolderNavigation';
-import { IFolderClient } from '@/types/folder';
+import { 
+  Folder, 
+  ChevronRight, 
+  ChevronDown, 
+  Home, 
+  MoreHorizontal,
+  FolderOpen
+} from 'lucide-react';
+import useSWR from 'swr';
+import { fetcher } from '@/helper/fetcher';
+import { useRouter } from 'next/navigation';
 
-interface FolderTreeProps {
-  folders: IFolderClient[];
-  currentFolderId?: string;
+// --- Types ---
+// Matching the structure returned by our optimized API
+interface IFolder {
+  _id: string;
+  name: string;
+  icon?: string;
+  children?: IFolder[]; // The API converts subFolders -> children for the tree
 }
 
-interface TreeNodeProps {
-  folder: IFolderClient;
-  children: IFolderClient[];
-  level: number;
-  currentFolderId?: string;
-  expandedFolders: Set<string | undefined>;
-  toggleExpanded: (folderId: string | undefined) => void;
-}
 
-function TreeNode({
-  folder,
-  children,
-  level,
-  currentFolderId,
-  expandedFolders,
-  toggleExpanded
-}: TreeNodeProps) {
-  console.log({ expandedFolders })
-  console.log({ folder })
-  const isExpanded = expandedFolders.has(folder._id);
-  const isSelected = currentFolderId === folder._id;
-  const hasChildren = children.length > 0;
-  const { goToFolder } = useFolderNavigation();
+
+// --- Components ---
+
+// 1. Recursive Folder Item Component
+const FolderItem = ({ 
+  folder, 
+  depth = 0, 
+  activeId, 
+  onSelect 
+}: { 
+  folder: IFolder; 
+  depth?: number; 
+  activeId: string; 
+  onSelect: (id: string) => void;
+}) => {
+  const [isOpen, setIsOpen] = useState(false);
+  const hasChildren = folder.children && folder.children.length > 0;
+  const router = useRouter();
+  // Base indentation + depth indentation
+  const paddingLeft = `${depth * 16 + 12}px`;
+
+  const handleToggle = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setIsOpen(!isOpen);
+    onSelect(folder._id);
+    router.push(`/folder/${folder._id}`);
+  };
+
   return (
-    <div>
-      <Button
-        variant={isSelected ? "secondary" : "ghost"}
-        className="w-full justify-start h-auto p-2 font-normal"
-        style={{ paddingLeft: `${8 + level * 16}px` }}
-        onClick={() => goToFolder(folder._id)}
+    <div className="select-none">
+      <div 
+        className={`
+          group flex items-center pr-3 py-1.5 my-0.5
+          text-sm font-medium rounded-md cursor-pointer transition-colors duration-200
+          ${activeId === folder._id 
+            ? 'bg-slate-100 text-slate-900 dark:bg-slate-800 dark:text-slate-100' 
+            : 'text-slate-600 hover:bg-slate-50 dark:text-slate-400 dark:hover:bg-slate-800/50'}
+        `}
+        style={{ paddingLeft }}
+        onClick={handleToggle}
       >
-        <div className="flex items-center gap-2 w-full">
-          {hasChildren && (
-            <span
-              onClick={(e) => {
-                e.stopPropagation();
-                toggleExpanded(folder._id);
-              }}
-              className="p-0.5 hover:bg-accent rounded-sm"
-            >
-              {isExpanded ? (
-                <ChevronDown className="h-3 w-3" />
-              ) : (
-                <ChevronRight className="h-3 w-3" />
-              )}
-            </span>
+        {/* Chevron / Spacer */}
+        <span 
+          className={`
+            mr-1 flex items-center justify-center w-4 h-4 rounded-sm 
+            hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors
+            ${hasChildren ? 'visible' : 'invisible'}
+          `}
+          onClick={(e) => {
+            e.stopPropagation();
+            setIsOpen(!isOpen);
+          }}
+        >
+          {isOpen ? (
+            <ChevronDown size={14} className="text-slate-400" />
+          ) : (
+            <ChevronRight size={14} className="text-slate-400" />
           )}
-          {!hasChildren && <div className="w-4" />}
-          <FolderIcon className="h-4 w-4 text-muted-foreground" />
-          <span className="truncate">{folder.name}</span>
-        </div>
-      </Button>
-      {hasChildren && isExpanded && (
-        <div>
-          {children.map((childFolder) => {
-            const grandChildren = folder._id ? [] : []; // Simplified for this demo
-            return (
-              <TreeNode
-                key={childFolder._id}
-                folder={childFolder}
-                // children={grandChildren}
-                level={level + 1}
-                currentFolderId={currentFolderId}
-                expandedFolders={expandedFolders}
-                toggleExpanded={toggleExpanded}
-              >{grandChildren}</TreeNode>
-            );
-          })}
+        </span>
+
+        {/* Icon */}
+        <span className="mr-2 text-slate-400 group-hover:text-slate-500 dark:text-slate-500 dark:group-hover:text-slate-300">
+          {isOpen&&hasChildren ? <FolderOpen size={16} /> : <Folder size={16} />}
+        </span>
+
+        {/* Name */}
+        <span className="truncate flex-1">{folder.name}</span>
+      </div>
+
+      {/* Recursive Children Rendering */}
+      {isOpen && hasChildren && (
+        <div className="flex flex-col">
+          {folder.children!.map((child) => (
+            <FolderItem 
+              key={child._id} 
+              folder={child} 
+              depth={depth + 1} 
+              activeId={activeId}
+              onSelect={onSelect}
+            />
+          ))}
         </div>
       )}
     </div>
   );
-}
+};
 
-export function FolderTree({ folders, currentFolderId }: FolderTreeProps) {
-  const [expandedFolders, setExpandedFolders] = useState<Set<string | undefined>>(new Set());
-
-  const toggleExpanded = (folderId: string | undefined) => {
-    if (!folderId) return;
-    const newExpanded = new Set(expandedFolders);
-    if (newExpanded.has(folderId)) {
-      newExpanded.delete(folderId);
-    } else {
-      newExpanded.add(folderId);
-    }
-    setExpandedFolders(newExpanded);
-  };
-
+// 2. Main Sidebar Component
+export default function FolderTree() {
+  const [activeFolderId, setActiveFolderId] = useState<string>("all");
+    const { data: foldersTree, error: foldersTreeError, isLoading: foldersTreeLoading } = useSWR(["/api/folders/tree", {}], fetcher);
+  console.log("FolderTree: ", foldersTree);
   return (
-    <div className="space-y-1">
-      <Button
-        variant={!currentFolderId ? "secondary" : "ghost"}
-        className="w-full justify-start h-auto p-2 font-normal"
-      // onClick={() => onFolderSelect(undefined)}
-      >
-        <div className="flex items-center gap-2">
-          <Home className="h-4 w-4 text-muted-foreground" />
-          <span>All Bookmarks</span>
-        </div>
-      </Button>
+    <div className="w-full max-w-xs h-[500px] border-r border-slate-200 bg-white dark:bg-slate-950 dark:border-slate-800 p-4 font-sans">
+      <div className="mb-4 px-2">
+        <h2 className="text-lg font-semibold tracking-tight text-slate-900 dark:text-slate-100">
+          Folders
+        </h2>
+      </div>
 
-      {folders?.map((folder) => {
-        const children = folders.filter(f => f.parentFolder === folder._id);
-        return (
-          <TreeNode
-            key={folder._id}
-            folder={folder}
-            // children={children}
-            level={0}
-            currentFolderId={currentFolderId}
-            expandedFolders={expandedFolders}
-            toggleExpanded={toggleExpanded}
-          >{children}</TreeNode>
-        );
-      })}
+      <nav className="space-y-1">
+        {/* "All Bookmarks" Static Item */}
+        <div 
+          onClick={() => setActiveFolderId("all")}
+          className={`
+            flex items-center px-3 py-2 text-sm font-medium rounded-md cursor-pointer
+            transition-colors duration-200 mb-4
+            ${activeFolderId === "all"
+              ? 'bg-slate-100 text-slate-900 dark:bg-slate-800 dark:text-slate-100'
+              : 'text-slate-600 hover:bg-slate-50 dark:text-slate-400 dark:hover:bg-slate-800/50'}
+          `}
+        >
+          <Home size={16} className="mr-3 text-slate-400" />
+          All Bookmarks
+        </div>
+
+        {/* Recursive Tree */}
+        <div className="space-y-0.5">
+          {foldersTree?.map((folder:IFolder) => (
+            <FolderItem 
+              key={folder._id} 
+              folder={folder} 
+              activeId={activeFolderId}
+              onSelect={setActiveFolderId}
+            />
+          ))}
+        </div>
+      </nav>
     </div>
   );
 }

@@ -4,11 +4,12 @@ import Folder from "@/models/folder.model";
 import Bookmark from "@/models/bookmark.model";
 import User from "@/models/User";
 import { connectToDatabase } from "@/lib/db";
+import { USER_ID } from "@/constants";
 
 async function seed() {
   await connectToDatabase();
 
-  const userId = new mongoose.Types.ObjectId("68f78b4cc6f131811e4f01b2");
+  const userId = new mongoose.Types.ObjectId(USER_ID);
 
   console.log("🌱 Clearing existing data...");
   await Folder.deleteMany({});

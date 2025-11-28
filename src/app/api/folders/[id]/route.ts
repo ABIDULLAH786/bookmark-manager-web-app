@@ -5,7 +5,7 @@ import { NextResponse } from "next/server";
 import { apiError } from "@/lib/apiError";
 
 interface Params {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }
 
 // ✅ GET — Get folder details with subfolders, bookmarks, and counts
@@ -59,14 +59,15 @@ export async function GET(req: Request, { params }: Params) {
     },
   };
 
-  return NextResponse.json(folderWithCounts);
+      return NextResponse.json({ success: true, data:folderWithCounts, message: "Folder Data fetched successfully" }, { status: 200 });
+  
 }
 
 export async function POST(req: Request, { params }: Params) {
   await connectToDatabase();
 
   try {
-    const { id: parentFolderId } = params; // parent folder ID
+    const { id: parentFolderId } = await params; // parent folder ID
     const body = await req.json();
 
     // Validate name
@@ -93,8 +94,8 @@ export async function POST(req: Request, { params }: Params) {
       parentFolder: parentFolderId, // ✅ link to parent
       createdAt: new Date(),
     });
+      return NextResponse.json({ success: true, data:newFolder, message: "Folder created successfully" }, { status: 201 });
 
-    return NextResponse.json(newFolder, { status: 201 });
   } catch (err: any) {
     console.error("Error creating folder:", err);
     console.log("err.name: ", err.name)
@@ -114,14 +115,17 @@ export async function POST(req: Request, { params }: Params) {
 export async function PUT(req: Request, { params }: Params) {
   await connectToDatabase();
   const data = await req.json();
+  const { id } = await params; 
 
-  const updated = await Folder.findByIdAndUpdate(params.id, data, { new: true });
-  return NextResponse.json(updated);
+  const updated = await Folder.findByIdAndUpdate(id, data, { new: true });
+        return NextResponse.json({ success: true, data:updated, message: "Folder updated successfully" }, { status: 200 });
+
 }
 
 // ✅ DELETE — Delete folder
 export async function DELETE(_: Request, { params }: Params) {
   await connectToDatabase();
-  await Folder.findByIdAndDelete(params.id);
+  const { id } = await params; 
+  await Folder.findByIdAndDelete(id);
   return NextResponse.json({ message: "Folder deleted" });
 }

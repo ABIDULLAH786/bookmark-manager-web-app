@@ -1,11 +1,11 @@
 import React from 'react';
 import { ExternalLink, MoreVertical } from 'lucide-react';
-import { Bookmark } from '@/types';
 import { Card, CardContent } from './Card';
 import { Button } from '../ui/button';
+import { IBookmarkClient } from '@/types';
 
 interface BookmarkCardProps {
-  bookmark: Bookmark;
+  bookmark: IBookmarkClient;
 }
 
 export function BookmarkCard({ bookmark }: BookmarkCardProps) {
