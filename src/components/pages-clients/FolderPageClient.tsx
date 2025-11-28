@@ -3,7 +3,6 @@
 import { FolderCard } from '@/components/cards/FolderCard';
 import { AddCard } from '@/components/cards/AddCard';
 import { BookmarkCard } from '@/components/cards/BookmarkCard';
-import { mockData } from '@/data/mockData';
 
 import { useModal } from '@/components/providers/ModalProvider';
 import useSWR from 'swr';
