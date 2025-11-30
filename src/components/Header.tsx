@@ -24,7 +24,7 @@ export function Header({ currentFolder }: HeaderProps) {
           <Link href={"/"} className="flex items-center gap-2">
             <Bookmark className="h-6 w-6 text-primary" />
             <h1 className="text-xl font-semibold">
-              {currentFolder ? currentFolder : 'Bookmark Manager Dev Mode'}
+              {currentFolder ? currentFolder : 'Bookmark Manager'}
             </h1>
           </Link>
         </div>
