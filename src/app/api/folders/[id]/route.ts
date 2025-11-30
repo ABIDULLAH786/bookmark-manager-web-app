@@ -1,7 +1,7 @@
 import { connectToDatabase } from "@/lib/db";
 import Folder from "@/models/folder.model";
 import Bookmark from "@/models/bookmark.model";
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { apiError } from "@/lib/apiError";
 
 interface Params {
@@ -12,7 +12,8 @@ interface Params {
 // Helper to exclude standard irrelevant fields
 const EXCLUDE_FIELDS = "-__v -sharedWith -isFavoriteBy -createdBy";
 
-export async function GET(req: Request, { params }: { params: { id: string } }) {
+export async function GET(req: NextRequest, { params }: Params) {
+
   await connectToDatabase();
 
   const { id } = await params;
