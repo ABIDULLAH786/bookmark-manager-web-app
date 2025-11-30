@@ -1,5 +1,4 @@
-import { IFolderClient } from "./folder";
+import { IFolderClient, ISubFolderClient, IFolderTreeClient } from "./folder";
 import { IBookmarkClient } from "./bookmark";
 
-
-export type { IBookmarkClient, IFolderClient };
+export type { IBookmarkClient, IFolderClient, ISubFolderClient, IFolderTreeClient };

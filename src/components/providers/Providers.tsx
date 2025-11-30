@@ -28,9 +28,11 @@ export default function Providers({ children }: { children: React.ReactNode }) {
                 <ModalProvider>
 
                     <NotificationProvider>
+                        <div className="fixed w-full">
                         {showHeader && <Header />}
 
-                        {children}
+                             {children}
+                        </div>
                     </NotificationProvider>
                 </ModalProvider>
             </ThemeProvider>

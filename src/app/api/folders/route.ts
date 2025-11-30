@@ -13,20 +13,20 @@ export async function GET() {
   // Use Promise.all with map (not forEach)
   const formattedFolders = await Promise.all(
     folders.map(async (folder) => {
-      // Find subfolders directly under this folder
-      const subfolders = await folderModel.find({ parentFolder: folder._id }).lean();
+      // Find subFolders directly under this folder
+      const subFolders = await folderModel.find({ parentFolder: folder._id }).lean();
 
       // Find bookmarks in this folder
       const bookmarks = await Bookmark.find({ parentFolder: folder._id }).lean();
 
       return {
         ...folder,
-        subfolders,
+        subFolders,
         bookmarks,
-        counts: {
-          subfolders: subfolders.length,
+        stats: {
+          subFolders: subFolders.length,
           bookmarks: bookmarks.length,
-          totalItems: subfolders.length + bookmarks.length,
+          totalItems: subFolders.length + bookmarks.length,
         },
       };
     })

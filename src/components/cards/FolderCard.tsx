@@ -22,7 +22,7 @@ export function FolderCard({ folder }: FolderCardProps) {
             <div className="flex-1">
               <h3 className="font-medium">{folder.name}</h3>
               <p className="text-sm text-muted-foreground">
-                {folder?.counts?.totalItems} {folder?.counts?.totalItems === 1 ? 'item' : 'items'}
+                {folder?.stats?.totalItems} {folder?.stats?.totalItems === 1 ? 'item' : 'items'}
               </p>
             </div>
           </div>

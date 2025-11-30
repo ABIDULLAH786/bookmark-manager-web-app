@@ -157,7 +157,7 @@ App.tsx
 ## Key Features to Understand
 
 ### Nested Folder Structure
-- Folders can contain subfolders (unlimited nesting)
+- Folders can contain subFolders (unlimited nesting)
 - `parentId` field determines hierarchy
 - Recursive rendering in FolderTree component
 - Breadcrumb navigation shows current path
