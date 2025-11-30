@@ -1,27 +1,38 @@
 'use client'
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { 
   Folder, 
   ChevronRight, 
   ChevronDown, 
   Home, 
-  MoreHorizontal,
   FolderOpen
 } from 'lucide-react';
 import useSWR from 'swr';
 import { fetcher } from '@/helper/fetcher';
-import { useRouter } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 
 // --- Types ---
-// Matching the structure returned by our optimized API
 interface IFolder {
   _id: string;
   name: string;
   icon?: string;
-  children?: IFolder[]; // The API converts subFolders -> children for the tree
+  children?: IFolder[]; 
 }
 
+// --- Helper Functions ---
 
+/**
+ * Recursively checks if a folder contains the activeId in its descendants.
+ */
+const isActivePath = (folder: IFolder, activeId: string): boolean => {
+  if (folder.children?.some(child => child._id === activeId)) {
+    return true;
+  }
+  if (folder.children?.some(child => isActivePath(child, activeId))) {
+    return true;
+  }
+  return false;
+};
 
 // --- Components ---
 
@@ -40,14 +51,41 @@ const FolderItem = ({
   const [isOpen, setIsOpen] = useState(false);
   const hasChildren = folder.children && folder.children.length > 0;
   const router = useRouter();
-  // Base indentation + depth indentation
+  
   const paddingLeft = `${depth * 16 + 12}px`;
+  const isSelected = activeId === folder._id;
 
-  const handleToggle = (e: React.MouseEvent) => {
+  // --- Auto-Expand Lifecycle ---
+  useEffect(() => {
+    // Expand if:
+    // 1. One of my children is the active folder
+    // 2. OR: I am the active folder (so I show my own children)
+    if (hasChildren && (isActivePath(folder, activeId) || activeId === folder._id)) {
+      setIsOpen(true);
+    }
+  }, [activeId, folder, hasChildren]);
+
+  // --- Handlers ---
+
+  // Handler for clicking the Main Row (Name/Icon)
+  const handleSelect = (e: React.MouseEvent) => {
     e.stopPropagation();
-    setIsOpen(!isOpen);
+    
+    // UI Decision: Clicking the name should SELECT and OPEN.
+    // It should NOT toggle close. To close, use the Chevron.
+    if (hasChildren) {
+      setIsOpen(true); 
+    }
+
     onSelect(folder._id);
     router.push(`/folder/${folder._id}`);
+  };
+
+  // Handler for clicking the Chevron (Arrow) only
+  const handleToggleClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    // This allows the user to close the folder manually without changing selection
+    setIsOpen(!isOpen);
   };
 
   return (
@@ -56,24 +94,21 @@ const FolderItem = ({
         className={`
           group flex items-center pr-3 py-1.5 my-0.5
           text-sm font-medium rounded-md cursor-pointer transition-colors duration-200
-          ${activeId === folder._id 
+          ${isSelected
             ? 'bg-slate-100 text-slate-900 dark:bg-slate-800 dark:text-slate-100' 
             : 'text-slate-600 hover:bg-slate-50 dark:text-slate-400 dark:hover:bg-slate-800/50'}
         `}
         style={{ paddingLeft }}
-        onClick={handleToggle}
+        onClick={handleSelect} // Main click triggers selection & open
       >
         {/* Chevron / Spacer */}
         <span 
           className={`
             mr-1 flex items-center justify-center w-4 h-4 rounded-sm 
-            hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors
+            hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors z-10
             ${hasChildren ? 'visible' : 'invisible'}
           `}
-          onClick={(e) => {
-            e.stopPropagation();
-            setIsOpen(!isOpen);
-          }}
+          onClick={handleToggleClick} // Specific click triggers toggle
         >
           {isOpen ? (
             <ChevronDown size={14} className="text-slate-400" />
@@ -84,7 +119,7 @@ const FolderItem = ({
 
         {/* Icon */}
         <span className="mr-2 text-slate-400 group-hover:text-slate-500 dark:text-slate-500 dark:group-hover:text-slate-300">
-          {isOpen&&hasChildren ? <FolderOpen size={16} /> : <Folder size={16} />}
+          {isOpen && hasChildren ? <FolderOpen size={16} /> : <Folder size={16} />}
         </span>
 
         {/* Name */}
@@ -110,10 +145,22 @@ const FolderItem = ({
 };
 
 // 2. Main Sidebar Component
-export default function FolderTree() {
-  const [activeFolderId, setActiveFolderId] = useState<string>("all");
-    const { data: foldersTree, error: foldersTreeError, isLoading: foldersTreeLoading } = useSWR(["/api/folders/tree", {}], fetcher);
-  console.log("FolderTree: ", foldersTree);
+export default function FolderTree({id}: {id?: string}) {
+  const params = useParams(); 
+  const router = useRouter();
+  
+  const [activeFolderId, setActiveFolderId] = useState<string>(id as string);
+  const { data: foldersTree, isLoading: foldersTreeLoading } = useSWR(["/api/folders/tree", {}], fetcher);
+
+  // Sync state with URL parameter
+  useEffect(() => {
+    if (id) {
+      setActiveFolderId(id as string);
+    } else {
+      setActiveFolderId("all");
+    }
+  }, [id]);
+
   return (
     <div className="w-full max-w-xs h-[500px] border-r border-slate-200 bg-white dark:bg-slate-950 dark:border-slate-800 p-4 font-sans">
       <div className="mb-4 px-2">
@@ -123,9 +170,11 @@ export default function FolderTree() {
       </div>
 
       <nav className="space-y-1">
-        {/* "All Bookmarks" Static Item */}
         <div 
-          onClick={() => setActiveFolderId("all")}
+          onClick={() => {
+            setActiveFolderId("all");
+            router.push('/folder');
+          }}
           className={`
             flex items-center px-3 py-2 text-sm font-medium rounded-md cursor-pointer
             transition-colors duration-200 mb-4
@@ -138,9 +187,8 @@ export default function FolderTree() {
           All Bookmarks
         </div>
 
-        {/* Recursive Tree */}
         <div className="space-y-0.5">
-          {foldersTree?.map((folder:IFolder) => (
+          {!foldersTreeLoading && foldersTree?.map((folder: IFolder) => (
             <FolderItem 
               key={folder._id} 
               folder={folder} 

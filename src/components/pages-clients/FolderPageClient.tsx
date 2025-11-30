@@ -10,13 +10,14 @@ import { fetcher } from '@/helper/fetcher';
 import { IFolderClient } from '@/types/folder';
 import { IBookmarkClient } from '@/types/bookmark';
 import FolderTree from '../FolderTree';
+import { Card } from '../cards/Card';
+import { Separator } from '../ui/separator';
 
 interface FolderPageClientProps {
     id: string;
 }
 
 export default function FolderPageClient({ id }: FolderPageClientProps) {
-    const { data: rootFolders, error: rootFolderError, isLoading: rootFolderLoading } = useSWR(["/api/folders/", {}], fetcher);
     const { data: folder, error: folderError, isLoading: folderLoading } = useSWR(["/api/folders/" + id, {}], fetcher);
     const { data: bookmarks, error: bookmarksError, isLoading: bookmarksLoading } = useSWR(["/api/bookmarks/" + id, {}], fetcher);
     console.log({ folder })
@@ -28,19 +29,17 @@ export default function FolderPageClient({ id }: FolderPageClientProps) {
         <div className="flex h-[calc(100vh-80px)]">
             {/* Sidebar */}
             {/* <div className="w-64  bg-card p-4 overflow-y-auto"> */}
-                <FolderTree
-                    // folders={rootFolders}
-                    // currentFolderId={currentFolderId}
-                />
+            <FolderTree id={id} />
             {/* </div> */}
 
             {/* Main Content */}
             <div className="flex-1 overflow-y-auto">
                 <div className="container mx-auto px-6 py-8">
-                    <div className='md:flex justify-between'>
+                    {/* Heading */}
+                    <Card className='md:flex flex-row items-center justify-between border-none'>
 
-                        <div className="mb-8">
-                            <h2 className="text-2xl font-semibold mb-2">
+                        <div className="">
+                            <h2 className="text-2xl font-semibold">
                                 {folder ? folder.name : 'All Bookmarks'}
                             </h2>
                             {folder?.description && (
@@ -50,11 +49,12 @@ export default function FolderPageClient({ id }: FolderPageClientProps) {
                         </div>
                         <div className='md:flex gap-3'>
                             {/* TODOS: add the small btn on the heading of the page  */}
-                            {/* <AddCard type="folder" onClick={() => setShowAddFolderModal(true)} />
-                            <AddCard type="bookmark" onClick={() => setShowAddBookmarkModal(true)} /> */}
+                            <AddCard type="folder" onClick={() => openAddFolder(id)} />
+                            <AddCard type="bookmark" onClick={() => openAddBookmark(id)} />
 
                         </div>
-                    </div>
+                    </Card>
+                    <Separator className="mt-4 mb-8" />
 
                     {/* Subfolders */}
                     {folder?.subfolders?.length > 0 && (
@@ -77,9 +77,6 @@ export default function FolderPageClient({ id }: FolderPageClientProps) {
                             {folder ? 'Bookmarks in this folder' : 'Recent Bookmarks'}
                         </h3>
                         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                            <AddCard type="folder" onClick={() => openAddFolder(id)} />
-                            <AddCard type="bookmark" onClick={() => openAddBookmark(id)} />
-
                             {bookmarks?.map((bookmark: IBookmarkClient) => (
                                 <BookmarkCard key={bookmark._id} bookmark={bookmark} />
                             ))}
