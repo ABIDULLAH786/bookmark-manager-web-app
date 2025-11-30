@@ -12,19 +12,21 @@ import { IBookmarkClient } from '@/types/bookmark';
 import FolderTree from '../FolderTree';
 import { Card } from '../cards/Card';
 import { Separator } from '../ui/separator';
+import { useEffect } from 'react';
+import { useFoldersStore } from '@/store/folders.store';
+import { API_PATHS } from '@/lib/apiPaths';
 
 interface FolderPageClientProps {
     id: string;
 }
 
 export default function FolderPageClient({ id }: FolderPageClientProps) {
-    const { data: folder, error: folderError, isLoading: folderLoading } = useSWR(["/api/folders/" + id, {}], fetcher);
-    const { data: bookmarks, error: bookmarksError, isLoading: bookmarksLoading } = useSWR(["/api/bookmarks/" + id, {}], fetcher);
+    const { data: folder, error: folderError, isLoading: folderLoading } = useSWR([API_PATHS.FOLDERS.DETAIL(id).url, {}], fetcher);
+    const { data: bookmarks, error: bookmarksError, isLoading: bookmarksLoading } = useSWR([API_PATHS.BOOKMARKS.DETAIL(id).url, {}], fetcher);
     console.log({ folder })
     console.log({ bookmarks })
     const { openAddFolder, openAddBookmark } = useModal();
-
-
+   
     return (
         <div className="flex h-[calc(100vh-80px)]">
             {/* Sidebar */}

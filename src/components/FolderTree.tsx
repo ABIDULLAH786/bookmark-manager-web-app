@@ -10,6 +10,7 @@ import {
 import useSWR from 'swr';
 import { fetcher } from '@/helper/fetcher';
 import { useParams, useRouter } from 'next/navigation';
+import { API_PATHS } from '@/lib/apiPaths';
 
 // --- Types ---
 interface IFolder {
@@ -150,7 +151,7 @@ export default function FolderTree({id}: {id?: string}) {
   const router = useRouter();
   
   const [activeFolderId, setActiveFolderId] = useState<string>(id as string);
-  const { data: foldersTree, isLoading: foldersTreeLoading } = useSWR(["/api/folders/tree", {}], fetcher);
+  const { data: foldersTree, isLoading: foldersTreeLoading } = useSWR([API_PATHS.FOLDERS.NESTED("/tree").LIST().url, {}], fetcher);
 
   // Sync state with URL parameter
   useEffect(() => {

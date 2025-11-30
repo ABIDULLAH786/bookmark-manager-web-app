@@ -10,6 +10,8 @@ import { fetcher } from '@/helper/fetcher';
 import { IError } from '@/types/error';
 import { useFoldersStore } from '@/store/folders.store';
 import { USER_ID } from '@/constants';
+import { API_PATHS } from '@/lib/apiPaths';
+import { HTTP_METHOD } from 'next/dist/server/web/http';
 
 interface AddFolderModalProps {
   open: boolean;
@@ -34,10 +36,11 @@ export function AddFolderModal({ open, onClose, parentFolderId }: AddFolderModal
     if (!name.trim()) return;
     setLoading(true);
     try {
+      const {url, method} = API_PATHS.FOLDERS.CREATE();
       const res = await fetcher([
-        "/api/folders",
+        url,
         {
-          method: "POST",
+          method: method as HTTP_METHOD,
           body: {
             name,
             description,
