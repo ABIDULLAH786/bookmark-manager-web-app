@@ -18,7 +18,6 @@ export function Header({ currentFolder }: HeaderProps) {
         <div className="flex items-center gap-4">
           {pathname !== '/' && <Button variant="ghost" size="sm" onClick={() => window.history.back()}>
             <ArrowLeft className="h-4 w-4 mr-2" />
-            Back
           </Button>}
 
           <Link href={"/"} className="flex items-center gap-2">

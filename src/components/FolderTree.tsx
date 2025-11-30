@@ -10,21 +10,16 @@ import {
 import useSWR from 'swr';
 import { fetcher } from '@/helper/fetcher';
 import { useParams, useRouter } from 'next/navigation';
-
-// --- Types ---
-interface IFolder {
-  _id: string;
-  name: string;
-  icon?: string;
-  children?: IFolder[]; 
-}
+import { API_PATHS } from '@/lib/apiPaths';
+import { useFoldersStore } from '@/store/folders.store';
+import { useFoldersTreeStore } from '@/store/folderTree.store';
+import { IFolderTreeClient } from '@/types';
 
 // --- Helper Functions ---
-
 /**
  * Recursively checks if a folder contains the activeId in its descendants.
  */
-const isActivePath = (folder: IFolder, activeId: string): boolean => {
+const isActivePath = (folder: IFolderTreeClient, activeId: string): boolean => {
   if (folder.children?.some(child => child._id === activeId)) {
     return true;
   }
@@ -43,7 +38,7 @@ const FolderItem = ({
   activeId, 
   onSelect 
 }: { 
-  folder: IFolder; 
+  folder: IFolderTreeClient; 
   depth?: number; 
   activeId: string; 
   onSelect: (id: string) => void;
@@ -148,10 +143,10 @@ const FolderItem = ({
 export default function FolderTree({id}: {id?: string}) {
   const params = useParams(); 
   const router = useRouter();
-  
+  const {setFoldersTree, foldersTree} = useFoldersTreeStore();
   const [activeFolderId, setActiveFolderId] = useState<string>(id as string);
-  const { data: foldersTree, isLoading: foldersTreeLoading } = useSWR(["/api/folders/tree", {}], fetcher);
-
+  const { data, error: foldersTreeError, isLoading: foldersTreeLoading } = useSWR([API_PATHS.FOLDERS.NESTED("/tree").LIST().url, {}], fetcher);
+  console.log("foldersTree: ", foldersTree)
   // Sync state with URL parameter
   useEffect(() => {
     if (id) {
@@ -160,9 +155,14 @@ export default function FolderTree({id}: {id?: string}) {
       setActiveFolderId("all");
     }
   }, [id]);
+  useEffect(() => {
+    if (data) {
+      setFoldersTree(data);
+    }
+  },[data])
 
   return (
-    <div className="w-full max-w-xs h-[500px] border-r border-slate-200 bg-white dark:bg-slate-950 dark:border-slate-800 p-4 font-sans">
+    <div className="w-full max-w-xs overflow-y-auto no-scrollbar border-r border-slate-200 bg-white dark:bg-slate-950 dark:border-slate-800 p-4 font-sans">
       <div className="mb-4 px-2">
         <h2 className="text-lg font-semibold tracking-tight text-slate-900 dark:text-slate-100">
           Folders
@@ -188,7 +188,7 @@ export default function FolderTree({id}: {id?: string}) {
         </div>
 
         <div className="space-y-0.5">
-          {!foldersTreeLoading && foldersTree?.map((folder: IFolder) => (
+          {!foldersTreeLoading && foldersTree?.map((folder: IFolderTreeClient) => (
             <FolderItem 
               key={folder._id} 
               folder={folder} 

@@ -1,9 +1,10 @@
-type HttpMethod = "GET" | "POST" | "PUT" | "DELETE" | "PATCH";
+import { HTTP_METHOD } from "next/dist/server/web/http";
+
 
 interface FetchOptions {
   limit?: number;
   page?: number;
-  method?: HttpMethod;
+  method?: HTTP_METHOD;
   body?: any;
 }
 

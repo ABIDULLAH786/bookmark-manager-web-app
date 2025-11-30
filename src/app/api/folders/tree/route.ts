@@ -61,7 +61,7 @@ export async function GET(req: Request) {
     const allFolders = await FolderModel.find({ 
       createdBy: userId 
     })
-    .select("_id name description icon parentFolder subFolders") 
+    .select("_id name parentFolder subFolders") 
     .lean() // Returns plain JS objects (faster, but no .toObject() method)
     .exec();
 

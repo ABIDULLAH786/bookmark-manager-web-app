@@ -7,14 +7,15 @@ import { fetcher } from '@/helper/fetcher';
 import useSWR from "swr";
 import { useFoldersStore } from '@/store/folders.store';
 import { useBookmarkStore } from '@/store/bookmarks';
+import { API_PATHS } from '@/lib/apiPaths';
 
 export default function AllFolders() {
-  const { folders, setFolders } = useFoldersStore()
+  const { folders: storeFolders, setFolders } = useFoldersStore()
   const {bookmarks, setBookmarks} = useBookmarkStore()
   const [showAddFolderModal, setShowAddFolderModal] = useState(false);
   const [showAddBookmarkModal, setShowAddBookmarkModal] = useState(false);
-  const { data: foldersData, error: foldersError, isLoading: foldersLoading } = useSWR(["/api/folders", {}], fetcher);
-  const { data: bookmarksData, error: bookmarksError, isLoading: bookmarksLoading } = useSWR(["/api/bookmarks", {}], fetcher);
+  const { data: foldersData, error: foldersError, isLoading: foldersLoading } = useSWR([API_PATHS.FOLDERS.LIST().url, {}], fetcher);
+  const { data: bookmarksData, error: bookmarksError, isLoading: bookmarksLoading } = useSWR([API_PATHS.BOOKMARKS.LIST().url, {}], fetcher);
   console.log({ foldersData })
   console.log({ bookmarksData })
 
@@ -31,7 +32,7 @@ export default function AllFolders() {
     <div className="min-h-screen bg-background">
       <main>
         <Homepage
-          folders={folders}
+          folders={storeFolders}
           bookmarks={bookmarks}
           onAddFolder={() => setShowAddFolderModal(true)}
           onAddBookmark={() => setShowAddBookmarkModal(true)}
