@@ -4,6 +4,8 @@ import { Card, CardContent } from './Card';
 import { useFolderNavigation } from '@/hook/useFolderNavigation';
 import { Button } from '../ui/button';
 import { IFolderClient } from '@/types/folder';
+import { DropdownMenu, DropdownMenuTrigger } from '../ui/dropdown-menu';
+import { FolderDropDown } from './FolderDropDown';
 
 interface FolderCardProps {
   folder: IFolderClient;
@@ -26,14 +28,13 @@ export function FolderCard({ folder }: FolderCardProps) {
               </p>
             </div>
           </div>
-          <Button
-            variant="ghost"
-            size="sm"
-            className="opacity-0 group-hover:opacity-100 transition-opacity"
+          <div
+            className="opacity-100 group-hover:opacity-100 transition-opacity"
             onClick={(e) => e.stopPropagation()}
           >
-            <MoreVertical className="h-4 w-4" />
-          </Button>
+            <FolderDropDown folder={folder}/>
+          </div>
+      
         </div>
         {folder.description && (
           <p className="text-sm text-muted-foreground line-clamp-2">{folder.description}</p>

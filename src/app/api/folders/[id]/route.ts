@@ -127,8 +127,8 @@ export async function POST(req: Request, { params }: Params) {
 }
 
 
-// ✅ PUT — Update folder
-export async function PUT(req: Request, { params }: Params) {
+// ✅ PATCH — Update folder
+export async function PATCH(req: Request, { params }: Params) {
   await connectToDatabase();
   const data = await req.json();
   const { id } = await params; 
@@ -141,7 +141,47 @@ export async function PUT(req: Request, { params }: Params) {
 // ✅ DELETE — Delete folder
 export async function DELETE(_: Request, { params }: Params) {
   await connectToDatabase();
-  const { id } = await params; 
-  await Folder.findByIdAndDelete(id);
-  return NextResponse.json({ message: "Folder deleted" });
+  const { id } = await params;
+
+  try {
+    // Check if folder exists first (optional, but good for validation)
+    const folderExists = await Folder.findById(id);
+    if (!folderExists) {
+      return NextResponse.json({ message: "Folder not found" }, { status: 404 });
+    }
+
+    // Run the recursive cleanup
+    await deleteFolderRecursively(id);
+
+    return NextResponse.json({ 
+      success: true, 
+      message: "Folder and all contents deleted successfully" 
+    }, { status: 200 });
+
+  } catch (error) {
+    console.error("Delete Error:", error);
+    return NextResponse.json({ 
+      success: false, 
+      message: "Failed to delete folder" 
+    }, { status: 500 });
+  }
 }
+
+
+// --- Helper: Recursive Delete Function ---
+const deleteFolderRecursively = async (folderId: string) => {
+  // 1. Find all direct sub-folders
+  const subFolders = await Folder.find({ parentFolder: folderId });
+
+  // 2. Recursively delete each sub-folder (and their contents)
+  // We use a loop to ensure operations complete in order
+  for (const subFolder of subFolders) {
+    await deleteFolderRecursively(subFolder._id);
+  }
+
+  // 3. Delete all bookmarks strictly inside THIS folder
+  await Bookmark.deleteMany({ parentFolder: folderId });
+
+  // 4. Delete the folder itself
+  await Folder.findByIdAndDelete(folderId);
+};

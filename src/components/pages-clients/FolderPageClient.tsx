@@ -13,7 +13,7 @@ import FolderTree from '../FolderTree';
 import { Card } from '../cards/Card';
 import { Separator } from '../ui/separator';
 import { useEffect } from 'react';
-import { useFoldersStore } from '@/store/folders.store';
+import { useFolderStore } from '@/store/folders.store';
 import { API_PATHS } from '@/lib/apiPaths';
 
 interface FolderPageClientProps {
@@ -21,7 +21,7 @@ interface FolderPageClientProps {
 }
 
 export default function FolderPageClient({ id }: FolderPageClientProps) {
-    const { setSingleSelectedFolder, singleSelectedFolder } = useFoldersStore()
+    const { setSingleSelectedFolder, singleSelectedFolder } = useFolderStore()
     const { data: singleFolder, error: singleFolderError, isLoading: singleFolderLoading } = useSWR([API_PATHS.FOLDERS.DETAIL(id).url, {}], fetcher);
     // const { data: bookmarks, error: bookmarksError, isLoading: bookmarksLoading } = useSWR([API_PATHS.BOOKMARKS.DETAIL(id).url, {}], fetcher);
     console.log({ singleFolder })

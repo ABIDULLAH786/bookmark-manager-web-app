@@ -11,7 +11,7 @@ import useSWR from 'swr';
 import { fetcher } from '@/helper/fetcher';
 import { useParams, useRouter } from 'next/navigation';
 import { API_PATHS } from '@/lib/apiPaths';
-import { useFoldersStore } from '@/store/folders.store';
+import { useFolderStore } from '@/store/folders.store';
 import { useFoldersTreeStore } from '@/store/folderTree.store';
 import { IFolderTreeClient } from '@/types';
 

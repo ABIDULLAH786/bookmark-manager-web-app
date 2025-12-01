@@ -8,7 +8,7 @@ import { IFolderClient } from '@/types/folder';
 import { mutate } from 'swr';
 import { fetcher } from '@/helper/fetcher';
 import { IError } from '@/types/error';
-import { useFoldersStore } from '@/store/folders.store';
+import { useFolderStore } from '@/store/folders.store';
 import { USER_ID } from '@/constants';
 import { API_PATHS } from '@/lib/apiPaths';
 import { HTTP_METHOD } from 'next/dist/server/web/http';
@@ -24,7 +24,7 @@ interface AddFolderModalProps {
 
 export function AddFolderModal({ open, onClose, parentFolderId }: AddFolderModalProps) {
 
-  const { addFolder, addSubFolderToSelected } = useFoldersStore();
+  const { addFolder, addSubFolderToSelected } = useFolderStore();
   const {addFolderToTree} = useFoldersTreeStore();
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
