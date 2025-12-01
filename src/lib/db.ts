@@ -1,10 +1,10 @@
 import mongoose from "mongoose";
 
-const MONGODB_URL = process.env.MONGODB_URL;
+const DB_URL = process.env.DB_URL;
 
-if (!MONGODB_URL) {
+if (!DB_URL) {
   // Use a clear error to know if the ENV is actually missing on Vercel
-  throw new Error("Please define MONGODB_URL in your Vercel Environment Variables"); 
+  throw new Error("Please define DB_URL in your Vercel Environment Variables"); 
 }
 
 // Ensure the global object is typed correctly to avoid TS errors
@@ -25,7 +25,7 @@ export async function connectToDatabase() {
     };
 
     // 👇 CRITICAL FIX: You must assign the promise to the variable!
-    cached.promise = mongoose.connect(MONGODB_URL!, opts).then((mongoose) => {
+    cached.promise = mongoose.connect(DB_URL!, opts).then((mongoose) => {
       return mongoose;
     });
   }
