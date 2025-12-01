@@ -27,7 +27,7 @@ import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { IFolderClient } from "@/types" // Adjust path to your types
 import { API_PATHS } from "@/lib/apiPaths" // Adjust path
-import { useFoldersStore } from "@/store/folders.store" // Adjust path
+import { useFolderStore } from "@/store/folders.store" // Adjust path
 import { useFoldersTreeStore } from "@/store/folderTree.store"
 
 interface FolderDropDownProps {
@@ -54,7 +54,7 @@ export function FolderDropDown({ folder }: FolderDropDownProps) {
     updateSubFolderInSelected, 
     removeSubFolderFromSelected,
     singleSelectedFolder
-  } = useFoldersStore()
+  } = useFolderStore()
   const { updateFolderInTree, removeFolderFromTree } = useFoldersTreeStore()
 
   // --- 1. Handle Update (PATCH) ---

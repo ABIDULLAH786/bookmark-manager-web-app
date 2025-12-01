@@ -10,7 +10,7 @@ import { fetcher } from '@/helper/fetcher';
 import { IError } from '@/types/error';
 import { USER_ID } from '@/constants';
 import { useBookmarkStore } from '@/store/bookmarks';
-import { useFoldersStore } from '@/store/folders.store';
+import { useFolderStore } from '@/store/folders.store';
 
 interface AddBookmarkModalProps {
   open: boolean;
@@ -22,7 +22,7 @@ interface AddBookmarkModalProps {
 
 export function AddBookmarkModal({ open, onClose, parentFolderId }: AddBookmarkModalProps) {
   const { addBookmark } = useBookmarkStore();
-  const {addBookmarkToSelected} = useFoldersStore();
+  const {addBookmarkToSelected} = useFolderStore();
   const [title, setTitle] = useState('');
   const [url, setUrl] = useState('');
   const [description, setDescription] = useState('');

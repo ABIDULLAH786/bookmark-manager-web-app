@@ -27,7 +27,7 @@ import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { IBookmarkClient } from "@/types" // Adjust path to your types
 import { API_PATHS } from "@/lib/apiPaths" // Adjust path
-import { useFoldersStore } from "@/store/folders.store" // Adjust path
+import { useFolderStore } from "@/store/folders.store" // Adjust path
 import { toast } from "sonner"
 
 interface BookmarkDropDownProps {
@@ -50,7 +50,7 @@ export function BookmarkDropDown({ bookmark }: BookmarkDropDownProps) {
     singleSelectedFolder,
     updateBookmarkInSelected,
     removeBookmarkFromSelected,
-  } = useFoldersStore()
+  } = useFolderStore()
 
   // --- 1. Handle Update (PATCH) ---
   const handleUpdateFolder = async () => {

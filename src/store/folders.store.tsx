@@ -24,7 +24,7 @@ interface FoldersState {
   updateBookmarkInSelected: (bookmark: IBookmarkClient) => void;
 }
 
-export const useFoldersStore = create<FoldersState>()(
+export const useFolderStore = create<FoldersState>()(
   persist(
     (set) => ({
       // ... Existing Sidebar Logic ...

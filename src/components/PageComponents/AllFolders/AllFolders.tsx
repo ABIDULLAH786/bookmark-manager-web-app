@@ -5,12 +5,12 @@ import { AddFolderModal } from '@/components/modals/AddFolderModal';
 import { AddBookmarkModal } from '@/components/modals/AddBookmarkModal';
 import { fetcher } from '@/helper/fetcher';
 import useSWR from "swr";
-import { useFoldersStore } from '@/store/folders.store';
+import { useFolderStore } from '@/store/folders.store';
 import { useBookmarkStore } from '@/store/bookmarks';
 import { API_PATHS } from '@/lib/apiPaths';
 
 export default function AllFolders() {
-  const { folders: storeFolders, setFolders } = useFoldersStore()
+  const { folders: storeFolders, setFolders } = useFolderStore()
   const {bookmarks, setBookmarks} = useBookmarkStore()
   const [showAddFolderModal, setShowAddFolderModal] = useState(false);
   const [showAddBookmarkModal, setShowAddBookmarkModal] = useState(false);
