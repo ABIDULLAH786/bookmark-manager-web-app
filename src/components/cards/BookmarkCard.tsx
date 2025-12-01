@@ -3,6 +3,7 @@ import { ExternalLink, MoreVertical } from 'lucide-react';
 import { Card, CardContent } from './Card';
 import { Button } from '../ui/button';
 import { IBookmarkClient } from '@/types';
+import { BookmarkDropDown } from './BookmarkDropDown';
 
 interface BookmarkCardProps {
   bookmark: IBookmarkClient;
@@ -26,14 +27,12 @@ export function BookmarkCard({ bookmark }: BookmarkCardProps) {
               <p className="text-sm text-muted-foreground truncate">{bookmark.url}</p>
             </div>
           </div>
-          <Button
-            variant="ghost"
-            size="sm"
-            className="opacity-0 group-hover:opacity-100 transition-opacity"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <MoreVertical className="h-4 w-4" />
-          </Button>
+         <div
+                     className="opacity-100 group-hover:opacity-100 transition-opacity"
+                     onClick={(e) => e.stopPropagation()}
+                   >
+                     <BookmarkDropDown bookmark={bookmark}/>
+                   </div>
         </div>
         {bookmark.description && (
           <p className="text-sm text-muted-foreground line-clamp-2">{bookmark.description}</p>

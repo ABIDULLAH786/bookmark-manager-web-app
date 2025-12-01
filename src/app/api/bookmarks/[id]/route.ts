@@ -70,16 +70,17 @@ export async function POST(req: NextRequest, { params }: RouteParams) {
   }
 }
 
-/* -------------------- PUT -------------------- */
-export async function PUT(req: NextRequest, { params }: RouteParams) {
+/* -------------------- PATCH -------------------- */
+export async function PATCH(req: NextRequest, { params }: RouteParams) {
   await connectToDatabase();
   
   // 4. AWAIT PARAMS HERE
   const { id } = await params; 
 
   const data = await req.json();
+  console.log("DataBeofreUpdate: ", data)
   const updated = await bookmarkModel.findByIdAndUpdate(id, data, { new: true });
-
+  console.log("updatedRes: ", updated)
   return NextResponse.json(
     { success: true, data: updated, message: "Bookmark updated successfully" },
     { status: 200 }

@@ -9,6 +9,8 @@ import { mutate } from 'swr';
 import { fetcher } from '@/helper/fetcher';
 import { IError } from '@/types/error';
 import { USER_ID } from '@/constants';
+import { useBookmarkStore } from '@/store/bookmarks';
+import { useFoldersStore } from '@/store/folders.store';
 
 interface AddBookmarkModalProps {
   open: boolean;
@@ -19,6 +21,8 @@ interface AddBookmarkModalProps {
 }
 
 export function AddBookmarkModal({ open, onClose, parentFolderId }: AddBookmarkModalProps) {
+  const { addBookmark } = useBookmarkStore();
+  const {addBookmarkToSelected} = useFoldersStore();
   const [title, setTitle] = useState('');
   const [url, setUrl] = useState('');
   const [description, setDescription] = useState('');
@@ -29,7 +33,7 @@ export function AddBookmarkModal({ open, onClose, parentFolderId }: AddBookmarkM
     if (!title.trim() || !url.trim()) return;
     setLoading(true);
     try {
-      await fetcher([
+      const data = await fetcher([
         "/api/bookmarks",
         {
           method: "POST",
@@ -44,9 +48,14 @@ export function AddBookmarkModal({ open, onClose, parentFolderId }: AddBookmarkM
           },
         },
       ]);
+      console.log("Bookmark added: ", data);
+      // mutate(parentFolderId ? `/api/bookmarks/${parentFolderId}` : "/api/bookmarks");
 
-      mutate(parentFolderId ? `/api/bookmarks/${parentFolderId}` : "/api/bookmarks");
-
+      if(parentFolderId) {
+        addBookmarkToSelected(data);
+      } else {
+        addBookmark(data);
+      }
       setTitle("");
       setUrl("");
       setDescription("");

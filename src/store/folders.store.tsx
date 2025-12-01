@@ -1,6 +1,7 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import { IFolderClient, ISubFolderClient } from "@/types/folder";
+import { IBookmarkClient } from "@/types";
 
 interface FoldersState {
   folders: IFolderClient[];
@@ -16,6 +17,11 @@ interface FoldersState {
   addSubFolderToSelected: (subFolder: IFolderClient) => void;
   removeSubFolderFromSelected: (subFolderId: string) => void;
   updateSubFolderInSelected: (subFolder: IFolderClient) => void;
+
+  // ------------(Single Slected Folder state handlers for Bookmarks)---------------
+  addBookmarkToSelected: (bookmark: IBookmarkClient) => void;
+  removeBookmarkFromSelected: (bookmarkId: string) => void;
+  updateBookmarkInSelected: (bookmark: IBookmarkClient) => void;
 }
 
 export const useFoldersStore = create<FoldersState>()(
@@ -74,6 +80,48 @@ export const useFoldersStore = create<FoldersState>()(
             // FIX HERE: Ensure we are mapping an array
             subFolders: (state.singleSelectedFolder.subFolders || []).map((f) =>
               f._id === updatedSubFolder._id ? updatedSubFolder : f
+            )
+          }
+        };
+      }),
+
+
+      // -------------(Single Selected Folder state handlers for Bookmark)
+      addBookmarkToSelected: (bookmark) => set((state) => {
+        if (!state.singleSelectedFolder) return {};
+
+        return {
+          singleSelectedFolder: {
+            ...state.singleSelectedFolder,
+            // FIX HERE: Ensure we are mapping an array
+            bookmarks: [...(state.singleSelectedFolder.bookmarks || []), bookmark]
+          }
+        };
+      }),
+
+      removeBookmarkFromSelected: (bookmarkId) => set((state) => {
+        if (!state.singleSelectedFolder) return {};
+
+        return {
+          singleSelectedFolder: {
+            ...state.singleSelectedFolder,
+            // FIX HERE: Ensure we are mapping an array
+            bookmarks: (state.singleSelectedFolder.bookmarks || []).filter(
+              (b) => b._id !== bookmarkId
+            )
+          }
+        };
+      }),
+
+      updateBookmarkInSelected: (updatedBookmark) => set((state) => {
+        if (!state.singleSelectedFolder) return {};
+
+        return {
+          singleSelectedFolder: {
+            ...state.singleSelectedFolder,
+            // FIX HERE: Ensure we are mapping an array
+            bookmarks: (state.singleSelectedFolder.bookmarks || []).map((b) =>
+              b._id === updatedBookmark._id ? updatedBookmark : b
             )
           }
         };
