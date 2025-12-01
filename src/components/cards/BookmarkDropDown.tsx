@@ -29,6 +29,7 @@ import { IBookmarkClient } from "@/types" // Adjust path to your types
 import { API_PATHS } from "@/lib/apiPaths" // Adjust path
 import { useFolderStore } from "@/store/folders.store" // Adjust path
 import { toast } from "sonner"
+import { useBookmarkStore } from "@/store/bookmarks"
 
 interface BookmarkDropDownProps {
   bookmark: IBookmarkClient;
@@ -51,6 +52,7 @@ export function BookmarkDropDown({ bookmark }: BookmarkDropDownProps) {
     updateBookmarkInSelected,
     removeBookmarkFromSelected,
   } = useFolderStore()
+  const {updateBookmark} = useBookmarkStore()
 
   // --- 1. Handle Update (PATCH) ---
   const handleUpdateFolder = async () => {
@@ -70,7 +72,12 @@ export function BookmarkDropDown({ bookmark }: BookmarkDropDownProps) {
 
       if (!res.ok) throw new Error("Failed to update");
       const { data: updatedBookmark } = await res.json();
-      updateBookmarkInSelected(updatedBookmark);
+      console.log("updatedBookmark: ", updatedBookmark)
+      if(bookmark?.parentFolder){
+        updateBookmarkInSelected(updatedBookmark);
+      }else{
+        updateBookmark(updatedBookmark)
+      }
       setShowUpdateDialog(false);
     } catch (error) {
       console.error(error);
