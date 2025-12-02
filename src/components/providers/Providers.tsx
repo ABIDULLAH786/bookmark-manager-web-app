@@ -26,13 +26,9 @@ export default function Providers({ children }: { children: React.ReactNode }) {
         <AuthProvider>
             <ThemeProvider>
                 <ModalProvider>
-
                     <NotificationProvider>
-                        <div className="fixed w-full">
                         {showHeader && <Header />}
-
                              {children}
-                        </div>
                     </NotificationProvider>
                 </ModalProvider>
             </ThemeProvider>

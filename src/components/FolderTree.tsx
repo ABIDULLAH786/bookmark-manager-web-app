@@ -140,8 +140,8 @@ const FolderItem = ({
 };
 
 // 2. Main Sidebar Component
-export default function FolderTree({id}: {id?: string}) {
-  const params = useParams(); 
+export default function FolderTree() {
+  const {id} = useParams(); 
   const router = useRouter();
   const {setFoldersTree, foldersTree} = useFoldersTreeStore();
   const [activeFolderId, setActiveFolderId] = useState<string>(id as string);
@@ -162,14 +162,8 @@ export default function FolderTree({id}: {id?: string}) {
   },[data])
 
   return (
-    <div className="w-full max-w-xs overflow-y-auto no-scrollbar border-r border-slate-200 bg-white dark:bg-slate-950 dark:border-slate-800 p-4 font-sans">
+    <div className="w-full max-w-xs overflow-y-auto no-scrollbar font-sans">
       <div className="mb-4 px-2">
-        <h2 className="text-lg font-semibold tracking-tight text-slate-900 dark:text-slate-100">
-          Folders
-        </h2>
-      </div>
-
-      <nav className="space-y-1">
         <div 
           onClick={() => {
             setActiveFolderId("all");
@@ -186,6 +180,10 @@ export default function FolderTree({id}: {id?: string}) {
           <Home size={16} className="mr-3 text-slate-400" />
           All Bookmarks
         </div>
+      </div>
+
+      <nav className="space-y-1">
+       
 
         <div className="space-y-0.5">
           {!foldersTreeLoading && foldersTree?.map((folder: IFolderTreeClient) => (

@@ -34,11 +34,9 @@ export default function FolderPageClient({ id }: FolderPageClientProps) {
     }, [singleFolder])
     return (
         <div className="flex h-[calc(100vh-80px)]">
-            <FolderTree id={id} />
-
             {/* Main Content */}
             <div className="flex-1 overflow-y-auto">
-                <div className="container mx-auto px-6 py-8">
+                <div className="px-6 py-8">
                     {/* Heading */}
                     <Card className='md:flex flex-row items-center justify-between border-none'>
 
