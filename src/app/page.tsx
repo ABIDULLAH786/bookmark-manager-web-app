@@ -1,11 +1,11 @@
 'use client';
-import AllFolders from '@/components/PageComponents/AllFolders/AllFolders';
+import FoldersAndBookmarks from '@/components/PageComponents/FoldersAndBookmarks/FoldersAndBookmarks';
 
 export default function App() {
 
   return (
     <>
-      <AllFolders />
+      <FoldersAndBookmarks />
     </>
   );
 }

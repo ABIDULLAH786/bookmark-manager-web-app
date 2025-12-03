@@ -9,7 +9,7 @@ import { useFolderStore } from '@/store/folders.store';
 import { useBookmarkStore } from '@/store/bookmarks';
 import { API_PATHS } from '@/lib/apiPaths';
 
-export default function AllFolders() {
+export default function FoldersAndBookmarks() {
   const { folders: storeFolders, setFolders } = useFolderStore()
   const {bookmarks, setBookmarks} = useBookmarkStore()
   const [showAddFolderModal, setShowAddFolderModal] = useState(false);
