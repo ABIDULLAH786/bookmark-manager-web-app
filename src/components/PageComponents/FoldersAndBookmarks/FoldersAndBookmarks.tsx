@@ -27,13 +27,21 @@ export default function FoldersAndBookmarks() {
       setBookmarks(bookmarksData)
     }
   }, [foldersData, bookmarksData])
+  
+  if(foldersError || bookmarksError) {
+    console.error({bookmarksError, foldersError})
+    return <div>Error: {foldersError?.message || bookmarksError?.message}</div>
+  }
 
+  
   return (
     <div className="min-h-screen bg-background">
       <main>
         <Homepage
           folders={storeFolders}
           bookmarks={bookmarks}
+          isFoldersLoading={foldersLoading}
+          isBookmarksLoading={bookmarksLoading}
           onAddFolder={() => setShowAddFolderModal(true)}
           onAddBookmark={() => setShowAddBookmarkModal(true)}
         />

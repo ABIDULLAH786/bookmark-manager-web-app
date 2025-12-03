@@ -15,7 +15,7 @@ export function BookmarkCard({ bookmark }: BookmarkCardProps) {
   };
 
   return (
-    <Card className="group hover:shadow-md transition-all duration-200 cursor-pointer" onClick={handleClick}>
+    <Card className="group hover:bg-slate-50 dark:hover:bg-slate-900 hover:shadow-md transition-all duration-200 cursor-pointer" onClick={handleClick}>
       <CardContent className="p-4">
         <div className="flex items-start justify-between mb-3">
           <div className="flex items-center gap-3">
@@ -27,12 +27,12 @@ export function BookmarkCard({ bookmark }: BookmarkCardProps) {
               <p className="text-sm text-muted-foreground truncate">{bookmark.url}</p>
             </div>
           </div>
-         <div
-                     className="opacity-100 group-hover:opacity-100 transition-opacity"
-                     onClick={(e) => e.stopPropagation()}
-                   >
-                     <BookmarkDropDown bookmark={bookmark}/>
-                   </div>
+          <div
+            className="opacity-100 group-hover:opacity-100 transition-opacity"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <BookmarkDropDown bookmark={bookmark} />
+          </div>
         </div>
         {bookmark.description && (
           <p className="text-sm text-muted-foreground line-clamp-2">{bookmark.description}</p>

@@ -15,7 +15,7 @@ import { Separator } from '../ui/separator';
 import { useEffect } from 'react';
 import { useFolderStore } from '@/store/folders.store';
 import { API_PATHS } from '@/lib/apiPaths';
-import { FolderPageSkeleton } from '../loaders/FolderPageSkeleton';
+import { PageMainAreaSkeleton } from '../loaders/FolderPageSkeleton';
 
 interface FolderPageClientProps {
     id: string;
@@ -38,7 +38,7 @@ export default function FolderPageClient({ id }: FolderPageClientProps) {
         console.error(singleFolderError)
     }
     if (singleFolderLoading) {
-        return <FolderPageSkeleton />
+        return <PageMainAreaSkeleton />
     }
     return (
         <div className="flex h-[calc(100vh-80px)]">

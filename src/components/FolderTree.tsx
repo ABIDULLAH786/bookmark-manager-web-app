@@ -172,7 +172,7 @@ export default function FolderTree() {
 
   return (
     <div className="w-full max-w-xs overflow-y-auto no-scrollbar font-sans">
-      <div className="mb-4 px-2">
+      <div className="px-2 py-2">
         <div
           onClick={() => {
             setActiveFolderId("all");
