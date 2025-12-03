@@ -14,7 +14,7 @@ interface FolderCardProps {
 export function FolderCard({ folder }: FolderCardProps) {
   const { goToFolder } = useFolderNavigation();
   return (
-    <Card className="group hover:shadow-md transition-all duration-200 cursor-pointer" onClick={() => goToFolder(folder?._id)}>
+    <Card className="group hover:bg-slate-50 dark:hover:bg-slate-900 hover:shadow-md transition-all duration-200 cursor-pointer" onClick={() => goToFolder(folder?._id)}>
       <CardContent className="p-4">
         <div className="flex items-start justify-between mb-3">
           <div className="flex items-center gap-3">
