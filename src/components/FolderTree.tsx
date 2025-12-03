@@ -1,10 +1,10 @@
 'use client'
 import React, { useEffect, useState } from 'react';
-import { 
-  Folder, 
-  ChevronRight, 
-  ChevronDown, 
-  Home, 
+import {
+  Folder,
+  ChevronRight,
+  ChevronDown,
+  Home,
   FolderOpen
 } from 'lucide-react';
 import useSWR from 'swr';
@@ -14,6 +14,7 @@ import { API_PATHS } from '@/lib/apiPaths';
 import { useFolderStore } from '@/store/folders.store';
 import { useFoldersTreeStore } from '@/store/folderTree.store';
 import { IFolderTreeClient } from '@/types';
+import { FolderTreeSkeleton } from './loaders/FolderTreeSkeleton';
 
 // --- Helper Functions ---
 /**
@@ -32,21 +33,21 @@ const isActivePath = (folder: IFolderTreeClient, activeId: string): boolean => {
 // --- Components ---
 
 // 1. Recursive Folder Item Component
-const FolderItem = ({ 
-  folder, 
-  depth = 0, 
-  activeId, 
-  onSelect 
-}: { 
-  folder: IFolderTreeClient; 
-  depth?: number; 
-  activeId: string; 
+const FolderItem = ({
+  folder,
+  depth = 0,
+  activeId,
+  onSelect
+}: {
+  folder: IFolderTreeClient;
+  depth?: number;
+  activeId: string;
   onSelect: (id: string) => void;
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const hasChildren = folder.children && folder.children.length > 0;
   const router = useRouter();
-  
+
   const paddingLeft = `${depth * 16 + 12}px`;
   const isSelected = activeId === folder._id;
 
@@ -65,11 +66,11 @@ const FolderItem = ({
   // Handler for clicking the Main Row (Name/Icon)
   const handleSelect = (e: React.MouseEvent) => {
     e.stopPropagation();
-    
+
     // UI Decision: Clicking the name should SELECT and OPEN.
     // It should NOT toggle close. To close, use the Chevron.
     if (hasChildren) {
-      setIsOpen(true); 
+      setIsOpen(true);
     }
 
     onSelect(folder._id);
@@ -85,19 +86,19 @@ const FolderItem = ({
 
   return (
     <div className="select-none">
-      <div 
+      <div
         className={`
           group flex items-center pr-3 py-1.5 my-0.5
           text-sm font-medium rounded-md cursor-pointer transition-colors duration-200
           ${isSelected
-            ? 'bg-slate-100 text-slate-900 dark:bg-slate-800 dark:text-slate-100' 
+            ? 'bg-slate-100 text-slate-900 dark:bg-slate-800 dark:text-slate-100'
             : 'text-slate-600 hover:bg-slate-50 dark:text-slate-400 dark:hover:bg-slate-800/50'}
         `}
         style={{ paddingLeft }}
         onClick={handleSelect} // Main click triggers selection & open
       >
         {/* Chevron / Spacer */}
-        <span 
+        <span
           className={`
             mr-1 flex items-center justify-center w-4 h-4 rounded-sm 
             hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors z-10
@@ -125,10 +126,10 @@ const FolderItem = ({
       {isOpen && hasChildren && (
         <div className="flex flex-col">
           {folder.children!.map((child) => (
-            <FolderItem 
-              key={child._id} 
-              folder={child} 
-              depth={depth + 1} 
+            <FolderItem
+              key={child._id}
+              folder={child}
+              depth={depth + 1}
               activeId={activeId}
               onSelect={onSelect}
             />
@@ -140,10 +141,10 @@ const FolderItem = ({
 };
 
 // 2. Main Sidebar Component
-export default function FolderTree({id}: {id?: string}) {
-  const params = useParams(); 
+export default function FolderTree() {
+  const { id } = useParams();
   const router = useRouter();
-  const {setFoldersTree, foldersTree} = useFoldersTreeStore();
+  const { setFoldersTree, foldersTree } = useFoldersTreeStore();
   const [activeFolderId, setActiveFolderId] = useState<string>(id as string);
   const { data, error: foldersTreeError, isLoading: foldersTreeLoading } = useSWR([API_PATHS.FOLDERS.NESTED("/tree").LIST().url, {}], fetcher);
   console.log("foldersTree: ", foldersTree)
@@ -159,18 +160,20 @@ export default function FolderTree({id}: {id?: string}) {
     if (data) {
       setFoldersTree(data);
     }
-  },[data])
+  }, [data])
+
+  if (foldersTreeError) {
+    console.error(foldersTreeError);
+  }
+
+  if (foldersTreeLoading) {
+    return <FolderTreeSkeleton />
+  }
 
   return (
-    <div className="w-full max-w-xs overflow-y-auto no-scrollbar border-r border-slate-200 bg-white dark:bg-slate-950 dark:border-slate-800 p-4 font-sans">
+    <div className="w-full max-w-xs overflow-y-auto no-scrollbar font-sans">
       <div className="mb-4 px-2">
-        <h2 className="text-lg font-semibold tracking-tight text-slate-900 dark:text-slate-100">
-          Folders
-        </h2>
-      </div>
-
-      <nav className="space-y-1">
-        <div 
+        <div
           onClick={() => {
             setActiveFolderId("all");
             router.push('/folder');
@@ -186,12 +189,16 @@ export default function FolderTree({id}: {id?: string}) {
           <Home size={16} className="mr-3 text-slate-400" />
           All Bookmarks
         </div>
+      </div>
+
+      <nav className="space-y-1">
+
 
         <div className="space-y-0.5">
           {!foldersTreeLoading && foldersTree?.map((folder: IFolderTreeClient) => (
-            <FolderItem 
-              key={folder._id} 
-              folder={folder} 
+            <FolderItem
+              key={folder._id}
+              folder={folder}
               activeId={activeFolderId}
               onSelect={setActiveFolderId}
             />

@@ -21,7 +21,7 @@ export function Homepage({
 }: HomepageProps) {
 
   return (
-    <div className="container mx-auto px-4 py-8">
+    <div className="px-4 py-8">
       <Card className=" flex flex-row justify-between border-none">
         <div className=''>
           <h2 className="text-2xl font-semibold mb-2">Your Bookmarks</h2>

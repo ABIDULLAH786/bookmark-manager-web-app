@@ -11,22 +11,20 @@ interface AddCardProps {
 
 export function AddCard({ type, onClick }: AddCardProps) {
   return (
-    <Card
-      className="flex items-center group h-fit hover:shadow-md transition-all duration-200 cursor-pointer border-dashed border-2 hover:border-primary/50"
+    <div
       onClick={onClick}
       title={type === 'folder' ? 'Create a new folder' : 'Save a new bookmark'}
     >
-      <div className="flex items-center justify-center gap-2 w-full px-2 py-4">
-  <Button
-    variant="ghost"
-    className="w-8 h-8 rounded-lg bg-primary/10 group-hover:bg-primary/20 flex items-center justify-center transition-colors"
-  >
-    <Plus className="h-4 w-4 text-primary" />
-  </Button>
+       <Button
+          type="button"
+          variant={"ghost"}
+          onClick={onClick}
+          className="flex items-center gap-2 px-4 py-2 rounded-md border border-dashed border-slate-300 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-900 transition-colors text-sm font-medium text-slate-600 dark:text-slate-300"
+        >
+          <Plus size={16} />
+          Add {type === 'folder' ? 'Folder' : 'Bookmark'}
+        </Button>
 
-  <h3 className="font-medium">Add {type === "folder" ? "Folder" : "Bookmark"}</h3>
-</div>
-
-    </Card>
+    </div>
   );
 }

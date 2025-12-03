@@ -15,6 +15,7 @@ import { Separator } from '../ui/separator';
 import { useEffect } from 'react';
 import { useFolderStore } from '@/store/folders.store';
 import { API_PATHS } from '@/lib/apiPaths';
+import { FolderPageSkeleton } from '../loaders/FolderPageSkeleton';
 
 interface FolderPageClientProps {
     id: string;
@@ -23,7 +24,7 @@ interface FolderPageClientProps {
 export default function FolderPageClient({ id }: FolderPageClientProps) {
     const { setSingleSelectedFolder, singleSelectedFolder } = useFolderStore()
     const { data: singleFolder, error: singleFolderError, isLoading: singleFolderLoading } = useSWR([API_PATHS.FOLDERS.DETAIL(id).url, {}], fetcher);
-    // const { data: bookmarks, error: bookmarksError, isLoading: bookmarksLoading } = useSWR([API_PATHS.BOOKMARKS.DETAIL(id).url, {}], fetcher);
+
     console.log({ singleFolder })
     console.log({ SubFolderbookmarks: singleFolder?.bookmarks })
     const { openAddFolder, openAddBookmark } = useModal();
@@ -32,13 +33,18 @@ export default function FolderPageClient({ id }: FolderPageClientProps) {
         if (singleFolder)
             setSingleSelectedFolder(singleFolder)
     }, [singleFolder])
+
+    if (singleFolderError) {
+        console.error(singleFolderError)
+    }
+    if (singleFolderLoading) {
+        return <FolderPageSkeleton />
+    }
     return (
         <div className="flex h-[calc(100vh-80px)]">
-            <FolderTree id={id} />
-
             {/* Main Content */}
             <div className="flex-1 overflow-y-auto">
-                <div className="container mx-auto px-6 py-8">
+                <div className="px-6 py-8">
                     {/* Heading */}
                     <Card className='md:flex flex-row items-center justify-between border-none'>
 
@@ -61,7 +67,7 @@ export default function FolderPageClient({ id }: FolderPageClientProps) {
                     <Separator className="mt-4 mb-8" />
 
                     {/* Subfolders */}
-                   {(singleSelectedFolder?.subFolders?.length ?? 0) > 0 && (
+                    {(singleSelectedFolder?.subFolders?.length ?? 0) > 0 && (
                         <div className="mb-8">
                             <h3 className="text-lg font-medium mb-4">Folders</h3>
                             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
