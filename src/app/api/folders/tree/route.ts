@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import mongoose from "mongoose";
 import FolderModel from "@/models/folder.model";
 import { USER_ID } from "@/constants";
+import { connectToDatabase } from "@/lib/db";
 // import { getServerSession } from "next-auth"; 
 
 // Helper function to build tree from flat array
@@ -43,10 +44,7 @@ const buildFolderTree = (folders: any[]) => {
 
 export async function GET(req: Request) {
   try {
-    // 1. Connect DB
-    if (mongoose.connection.readyState === 0) {
-        await mongoose.connect(process.env.MONGODB_URI!);
-    }
+    connectToDatabase();
 
     // 2. Get User ID (Mocked here, replace with actual session logic)
     // const session = await getServerSession(authOptions);

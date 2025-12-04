@@ -1,7 +1,7 @@
 // src/hooks/useFolderNavigation.ts
 "use client";
 
-import { useRouter } from "next/navigation";
+import { useRouter } from 'nextjs-toploader/app';
 
 export function useFolderNavigation() {
   const router = useRouter();

@@ -9,7 +9,8 @@ import {
 } from 'lucide-react';
 import useSWR from 'swr';
 import { fetcher } from '@/helper/fetcher';
-import { useParams, useRouter } from 'next/navigation';
+import { useParams } from 'next/navigation';
+import { useRouter } from 'nextjs-toploader/app';
 import { API_PATHS } from '@/lib/apiPaths';
 import { useFolderStore } from '@/store/folders.store';
 import { useFoldersTreeStore } from '@/store/folderTree.store';

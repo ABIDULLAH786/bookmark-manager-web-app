@@ -2,7 +2,8 @@
 
 import { useState } from "react"
 import { MoreVertical, Loader2 } from "lucide-react"
-import { useRouter, useParams } from "next/navigation"
+import { useParams } from "next/navigation"
+import { useRouter } from 'nextjs-toploader/app';
 
 import { Button } from "@/components/ui/button"
 import {

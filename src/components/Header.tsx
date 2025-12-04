@@ -3,6 +3,8 @@ import { ArrowLeft, Bookmark } from 'lucide-react';
 import { Button } from './ui/button';
 import ThemeToggle from './ThemeToggle';
 import { usePathname } from 'next/navigation';
+import { useRouter } from 'nextjs-toploader/app';
+
 import Link from 'next/link';
 import { SidebarTrigger } from './ui/sidebar';
 
@@ -13,6 +15,8 @@ interface HeaderProps {
 
 export function Header({ currentFolder }: HeaderProps) {
   const pathname = usePathname();
+  const router = useRouter();
+
   return (
     <header className="border-b bg-card sticky top-0 z-50">
       <div className="px-4 py-4 flex items-center justify-between">
@@ -32,8 +36,43 @@ export function Header({ currentFolder }: HeaderProps) {
             </Link>
           </div>
         </div>
-        <ThemeToggle />
+        <div className='flex items-center justify-center gap-4 md:pr-5'>
+          <ThemeToggle />
+          <UserDropDown />
+        </div>
       </div>
     </header>
+  );
+}
+
+
+
+import { LogOut, Settings, User } from "lucide-react";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from './ui/dropdown-menu';
+import { Avatar, AvatarFallback } from './ui/avatar';
+
+export default function UserDropDown() {
+  const router = useRouter();
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger className="cursor-pointer focus:outline-hidden focus:ring-2 focus:ring-offset focus:ring-primary rounded-full">
+        <Avatar>
+          <AvatarFallback>A</AvatarFallback>
+        </Avatar>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent>
+        <DropdownMenuLabel>My Account</DropdownMenuLabel>
+        <DropdownMenuSeparator />
+        <DropdownMenuItem>
+          <User className="h-4 w-4" /> Profile
+        </DropdownMenuItem>
+        <DropdownMenuItem>
+          <Settings className="h-4 w-4" /> Settings
+        </DropdownMenuItem>
+        <DropdownMenuItem className="text-destructive">
+          <LogOut className="h-4 w-4" /> Logout
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
   );
 }

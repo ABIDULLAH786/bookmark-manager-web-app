@@ -1,7 +1,9 @@
 "use client";
 
 import { signIn } from "next-auth/react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
+import { useRouter } from 'nextjs-toploader/app';
+
 import React, { Suspense, useState } from "react";
 import { Input } from "@/components/ui/input";
 import { useNotification } from "@/components/Notification";
