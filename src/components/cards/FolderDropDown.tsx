@@ -2,7 +2,8 @@
 
 import { useState } from "react"
 import { MoreVertical, Loader2 } from "lucide-react"
-import { useRouter, useParams } from "next/navigation"
+import { useParams } from "next/navigation"
+import { useRouter } from 'nextjs-toploader/app';
 
 import { Button } from "@/components/ui/button"
 import {
@@ -115,7 +116,7 @@ export function FolderDropDown({ folder }: FolderDropDownProps) {
       // C. Redirect if we are currently INSIDE the deleted folder
       // logic: if the URL param ID matches the deleted folder ID
       if (params?.id === folder._id) {
-         router.push('/folder/all');
+         router.push('/dashboard/folder/all');
       }
 
       setShowDeleteDialog(false);

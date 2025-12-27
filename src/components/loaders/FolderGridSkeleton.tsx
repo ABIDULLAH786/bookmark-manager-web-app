@@ -12,8 +12,8 @@ export const FolderGridSkeleton = () => {
         <div 
           key={i} 
           className={`
-            h-32 rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 p-4 space-y-3
-            ${i < 3 ? 'block' : i < 4 ? 'hidden md:block' : i < 6 ? 'hidden lg:block' : 'hidden xl:block'}
+            h-32 rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 p-4 space-y-3 
+            ${i < 3 ? 'block' : i < 4 ? 'hidden md:block' : i < 6 ? 'hidden lg:block' : i < 8 ?'hidden xl:block': 'hidden 2xl:block'}
           `}
         >
           {/* Top Row: Icon & Menu */}

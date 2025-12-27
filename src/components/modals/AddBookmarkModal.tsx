@@ -8,9 +8,10 @@ import { IBookmarkClient } from '@/types/bookmark';
 import { mutate } from 'swr';
 import { fetcher } from '@/helper/fetcher';
 import { IError } from '@/types/error';
-import { USER_ID } from '@/constants';
 import { useBookmarkStore } from '@/store/bookmarks';
 import { useFolderStore } from '@/store/folders.store';
+import { useSession } from 'next-auth/react';
+import { useRouter } from 'next/navigation';
 
 interface AddBookmarkModalProps {
   open: boolean;
@@ -21,6 +22,8 @@ interface AddBookmarkModalProps {
 }
 
 export function AddBookmarkModal({ open, onClose, parentFolderId }: AddBookmarkModalProps) {
+  const { data: session, status } = useSession();
+  const router = useRouter();
   const { addBookmark } = useBookmarkStore();
   const {addBookmarkToSelected} = useFolderStore();
   const [title, setTitle] = useState('');
@@ -30,6 +33,14 @@ export function AddBookmarkModal({ open, onClose, parentFolderId }: AddBookmarkM
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const handleCreateBookmark = async (e: React.FormEvent) => {
     e.preventDefault();
+     
+    // 3. Security Check: Redirect if not authenticated
+    if (status === "unauthenticated" || !session?.user) {
+        // Optional: Close modal before redirecting
+        onClose(); 
+        return router.push("/login");
+    }
+
     if (!title.trim() || !url.trim()) return;
     setLoading(true);
     try {
@@ -43,8 +54,7 @@ export function AddBookmarkModal({ open, onClose, parentFolderId }: AddBookmarkM
             description,
             parentFolder: parentFolderId,
             createdAt: new Date(),
-            createdBy: USER_ID // TODO: replace with real loggedin user ID
-
+            createdBy: (session.user as any).id 
           },
         },
       ]);

@@ -2,6 +2,9 @@ import { NextResponse } from "next/server";
 import mongoose from "mongoose";
 import FolderModel from "@/models/folder.model";
 import { USER_ID } from "@/constants";
+import { connectToDatabase } from "@/lib/db";
+import { authOptions } from "@/lib/auth";
+import { getServerSession } from "next-auth";
 // import { getServerSession } from "next-auth"; 
 
 // Helper function to build tree from flat array
@@ -12,9 +15,9 @@ const buildFolderTree = (folders: any[]) => {
   // 1. Initialize all folders in a map
   folders.forEach((folder) => {
     // FIX: Removed .toObject() because .lean() returns plain objects already
-    folderMap.set(folder._id.toString(), { 
-      ...folder, 
-      children: [] 
+    folderMap.set(folder._id.toString(), {
+      ...folder,
+      children: []
     });
   });
 
@@ -43,27 +46,26 @@ const buildFolderTree = (folders: any[]) => {
 
 export async function GET(req: Request) {
   try {
-    // 1. Connect DB
-    if (mongoose.connection.readyState === 0) {
-        await mongoose.connect(process.env.MONGODB_URI!);
+    const session = await getServerSession(authOptions);
+    connectToDatabase();
+    if (!session || !session.user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    // 2. Get User ID (Mocked here, replace with actual session logic)
-    // const session = await getServerSession(authOptions);
-    // const userId = session?.user?.id;
-    const userId = USER_ID; 
+    // We cast as 'any' because default types might not show 'id' yet
+    const userId = (session.user as any).id ?? USER_ID;
 
     if (!userId) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     // 3. OPTIMIZED FETCH: Get ALL folders for this user in ONE query.
-    const allFolders = await FolderModel.find({ 
-      createdBy: userId 
+    const allFolders = await FolderModel.find({
+      createdBy: userId
     })
-    .select("_id name parentFolder subFolders") 
-    .lean() // Returns plain JS objects (faster, but no .toObject() method)
-    .exec();
+      .select("_id name parentFolder subFolders")
+      .lean() // Returns plain JS objects (faster, but no .toObject() method)
+      .exec();
 
     // 4. Construct the tree in memory
     const folderTree = buildFolderTree(allFolders);

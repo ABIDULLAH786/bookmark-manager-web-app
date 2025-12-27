@@ -5,6 +5,8 @@ import { Header } from "../Header";
 import AuthProvider from "./AuthProvider";
 import { ThemeProvider } from "./ThemeProvider";
 import { ModalProvider } from "./ModalProvider";
+import { AppSidebar } from "../AppSidebar";
+import { SidebarInset } from "../ui/sidebar";
 
 
 export default function Providers({ children }: { children: React.ReactNode }) {
@@ -13,7 +15,7 @@ export default function Providers({ children }: { children: React.ReactNode }) {
 
     // Define routes where you want to show the Header
     // const showHeaderRoutes = ["/", "/videos"];
-    const excludeHeader = ["/login", "/register"];
+    const excludeHeader = ["/login", "/register", "/"];
     const showHeader = !excludeHeader.includes(pathname);
 
     // Same as above two lines
@@ -27,8 +29,13 @@ export default function Providers({ children }: { children: React.ReactNode }) {
             <ThemeProvider>
                 <ModalProvider>
                     <NotificationProvider>
-                        {showHeader && <Header />}
-                             {children}
+                        {showHeader && <AppSidebar />}
+                        <SidebarInset className="flex flex-col flex-1 min-w-0 overflow-hidden">
+
+                            {showHeader && <Header />}
+                            {children}
+                        </SidebarInset>
+
                     </NotificationProvider>
                 </ModalProvider>
             </ThemeProvider>

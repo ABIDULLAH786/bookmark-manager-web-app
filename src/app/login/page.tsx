@@ -1,7 +1,9 @@
 "use client";
 
 import { signIn } from "next-auth/react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
+import { useRouter } from 'nextjs-toploader/app';
+
 import React, { Suspense, useState } from "react";
 import { Input } from "@/components/ui/input";
 import { useNotification } from "@/components/Notification";
@@ -11,7 +13,7 @@ import { Button } from "@/components/ui/button";
 import CenterContainer from "@/components/CenterContainer";
 import { Label } from "@/components/ui/label";
 function LoginPage() {
-  <Suspense fallback={<div>Loading...</div>}>
+  return <Suspense fallback={<div>Loading...</div>}>
     <LoginForm />
   </Suspense>
 }
@@ -24,28 +26,27 @@ function LoginForm() {
   const { showNotification } = useNotification();
 
   const searchParams = useSearchParams();
-  const callbackUrl = searchParams.get("callbackUrl") || "/";
-  const baseUrl = window?.location?.origin; // "http://localhost:3000"
-
+  const callbackUrl = searchParams.get("callbackUrl") || "/dashboard";
+  
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    const baseUrl = window?.location?.origin;
     console.log("callbackUrl: ", callbackUrl)
     const result = await signIn("credentials", {
       email,
       password,
       redirect: false,
       callbackUrl,
-
     });
 
+    console.log("result: ", result)
     if (result?.error) {
       showNotification(result?.error || "Login failed", "error");
     } else {
       showNotification("Logged in successfully", "success");
-      router.push(callbackUrl.replace(baseUrl, "") || "/");
+      router.push(callbackUrl.replace(baseUrl, "") || "/dashboard");
     }
   };
-
   return (
     <CenterContainer>
       <h1 className="text-2xl font-semibold text-center mb-2">Welcome Back</h1>
@@ -81,9 +82,9 @@ function LoginForm() {
         </Button>
       </form>
 
-      <div className="mt-6">
+      {/* <div className="mt-6">
         <LoginWithGoogleButton />
-      </div>
+      </div> */}
 
       <div className="mt-6 text-center text-sm text-muted-foreground">
         Don’t have an account?{" "}

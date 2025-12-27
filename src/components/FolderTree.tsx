@@ -9,7 +9,8 @@ import {
 } from 'lucide-react';
 import useSWR from 'swr';
 import { fetcher } from '@/helper/fetcher';
-import { useParams, useRouter } from 'next/navigation';
+import { useParams } from 'next/navigation';
+import { useRouter } from 'nextjs-toploader/app';
 import { API_PATHS } from '@/lib/apiPaths';
 import { useFolderStore } from '@/store/folders.store';
 import { useFoldersTreeStore } from '@/store/folderTree.store';
@@ -74,7 +75,7 @@ const FolderItem = ({
     }
 
     onSelect(folder._id);
-    router.push(`/folder/${folder._id}`);
+    router.push(`/dashboard/folder/${folder._id}`);
   };
 
   // Handler for clicking the Chevron (Arrow) only
@@ -176,7 +177,7 @@ export default function FolderTree() {
         <div
           onClick={() => {
             setActiveFolderId("all");
-            router.push('/folder');
+            router.push('/dashboard/folder');
           }}
           className={`
             flex items-center px-3 py-2 text-sm font-medium rounded-md cursor-pointer

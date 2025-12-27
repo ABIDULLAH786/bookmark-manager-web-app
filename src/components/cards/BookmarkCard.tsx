@@ -18,8 +18,8 @@ export function BookmarkCard({ bookmark }: BookmarkCardProps) {
     <Card className="group hover:bg-slate-50 dark:hover:bg-slate-900 hover:shadow-md transition-all duration-200 cursor-pointer" onClick={handleClick}>
       <CardContent className="p-4">
         <div className="flex items-start justify-between mb-3">
-          <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-lg bg-muted flex items-center justify-center text-lg">
+          <div className="flex items-center gap-3 flex-1 min-w-0"> 
+            <div className="w-8 h-8 rounded-lg bg-muted flex items-center justify-center text-lg shrink-0">
               {bookmark?.icon || '🔗'}
             </div>
             <div className="flex-1 min-w-0">

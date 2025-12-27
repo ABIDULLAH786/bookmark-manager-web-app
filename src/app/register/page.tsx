@@ -1,6 +1,6 @@
 "use client";
 
-import { useRouter } from "next/navigation";
+import { useRouter } from 'nextjs-toploader/app';
 import React, { useState } from "react";
 import { useNotification } from "@/components/Notification";
 import { Input } from "@/components/ui/input";

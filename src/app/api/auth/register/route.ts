@@ -1,29 +1,35 @@
+import { apiHandler } from "@/lib/api-handler";
 import { connectToDatabase } from "@/lib/db";
 import User from "@/models/User";
+import bcrypt from "bcryptjs";
 import { NextRequest, NextResponse } from "next/server";
+import { use } from "react";
 
 
-export async function POST(request: NextRequest) {
-    try {
-        const { email, password } = await request.json()
-        if (!email || !password)
-            return NextResponse.json({ error: "Email and Password are required" }, { status: 400 })
+export const POST = apiHandler(async (request) => {
+    const { email, password } = await request.json()
+    if (!email || !password)
+        return NextResponse.json({ error: "Email and Password are required" }, { status: 400 })
 
-        await connectToDatabase();
+    await connectToDatabase();
 
-        const existingUser = await User.findOne({ email })
-        if (existingUser)
-            return NextResponse.json({ error: "Email already registered in system" }, { status: 400 })
+    const existingUser = await User.findOne({ email })
+    if (existingUser)
+        return NextResponse.json({ error: "Email already registered in system" }, { status: 400 })
 
-        await User.create({
-            email, password
-        });
+    const hashedPassword = await bcrypt.hash(password, 10); // Hash with salt rounds
 
-        return NextResponse.json({ message: "User registered successfully" }, { status: 200 })
+    const newUser = await User.create({
+        username: email.split("@")[0],
+        email,
+        password: hashedPassword 
+    });
+    
 
-    } catch (error) {
-        console.error("Registeration Error: ", { error })
-        return NextResponse.json({ error: "Filed to register" }, { status: 500 })
-
-    }
-}
+    return NextResponse.json({
+        success: true,
+        message: "User created successfully",
+        data: newUser,
+    });
+    return NextResponse.json({ message: "User registered successfully" }, { status: 200 })
+})
