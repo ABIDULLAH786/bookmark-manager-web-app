@@ -26,7 +26,7 @@ function LoginForm() {
   const { showNotification } = useNotification();
 
   const searchParams = useSearchParams();
-  const callbackUrl = searchParams.get("callbackUrl") || "/";
+  const callbackUrl = searchParams.get("callbackUrl") || "/dashboard";
   
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -37,14 +37,14 @@ function LoginForm() {
       password,
       redirect: false,
       callbackUrl,
-
     });
 
+    console.log("result: ", result)
     if (result?.error) {
       showNotification(result?.error || "Login failed", "error");
     } else {
       showNotification("Logged in successfully", "success");
-      router.push(callbackUrl.replace(baseUrl, "") || "/");
+      router.push(callbackUrl.replace(baseUrl, "") || "/dashboard");
     }
   };
   return (
@@ -82,9 +82,9 @@ function LoginForm() {
         </Button>
       </form>
 
-      <div className="mt-6">
+      {/* <div className="mt-6">
         <LoginWithGoogleButton />
-      </div>
+      </div> */}
 
       <div className="mt-6 text-center text-sm text-muted-foreground">
         Don’t have an account?{" "}

@@ -75,7 +75,7 @@ const FolderItem = ({
     }
 
     onSelect(folder._id);
-    router.push(`/folder/${folder._id}`);
+    router.push(`/dashboard/folder/${folder._id}`);
   };
 
   // Handler for clicking the Chevron (Arrow) only
@@ -177,7 +177,7 @@ export default function FolderTree() {
         <div
           onClick={() => {
             setActiveFolderId("all");
-            router.push('/folder');
+            router.push('/dashboard/folder');
           }}
           className={`
             flex items-center px-3 py-2 text-sm font-medium rounded-md cursor-pointer

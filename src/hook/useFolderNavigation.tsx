@@ -8,7 +8,7 @@ export function useFolderNavigation() {
 
   const goToFolder = (folderId: string | undefined) => {
     if(!folderId) return;
-    router.push(`/folder/${folderId}`);
+    router.push(`/dashboard/folder/${folderId}`);
   };
 
   return { goToFolder };

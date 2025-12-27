@@ -11,7 +11,7 @@ export default withAuth(
 
     // If user is logged-in and tries to access login/register, redirect to home
     if (token && (pathname === '/login' || pathname === '/register')) {
-      return NextResponse.redirect(new URL('/', req.url));
+      return NextResponse.redirect(new URL('/dashboard', req.url));
     }
 
     // Otherwise, continue to the requested page
@@ -24,7 +24,7 @@ export default withAuth(
       authorized({ req, token }) {
         console.log("TOKEN IS: ", token)
         const { pathname } = req.nextUrl;
-        return true; //TODO: remove this line after proper authorization on production
+        // return true; //TODO: remove this line after proper authorization on production
         // 1. Add for debugging: Check your terminal
         console.log("MIDDLEWARE PATH:", pathname);
         console.log("HAS TOKEN:", !!token);
