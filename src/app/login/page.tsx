@@ -13,7 +13,7 @@ import { Button } from "@/components/ui/button";
 import CenterContainer from "@/components/CenterContainer";
 import { Label } from "@/components/ui/label";
 function LoginPage() {
-  <Suspense fallback={<div>Loading...</div>}>
+  return <Suspense fallback={<div>Loading...</div>}>
     <LoginForm />
   </Suspense>
 }
@@ -27,10 +27,10 @@ function LoginForm() {
 
   const searchParams = useSearchParams();
   const callbackUrl = searchParams.get("callbackUrl") || "/";
-  const baseUrl = window?.location?.origin; // "http://localhost:3000"
-
+  
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    const baseUrl = window?.location?.origin;
     console.log("callbackUrl: ", callbackUrl)
     const result = await signIn("credentials", {
       email,
@@ -47,7 +47,6 @@ function LoginForm() {
       router.push(callbackUrl.replace(baseUrl, "") || "/");
     }
   };
-
   return (
     <CenterContainer>
       <h1 className="text-2xl font-semibold text-center mb-2">Welcome Back</h1>

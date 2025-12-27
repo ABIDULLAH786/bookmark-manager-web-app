@@ -6,7 +6,7 @@ if (!DB_URL) {
   // Use a clear error to know if the ENV is actually missing on Vercel
   throw new Error("Please define DB_URL in your Vercel Environment Variables"); 
 }
-
+console.log("🔥 DEBUG: DB_URL is currently:", DB_URL);
 // Ensure the global object is typed correctly to avoid TS errors
 let cached = (global as any).mongoose;
 

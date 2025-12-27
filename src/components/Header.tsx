@@ -7,6 +7,7 @@ import { useRouter } from 'nextjs-toploader/app';
 
 import Link from 'next/link';
 import { SidebarTrigger } from './ui/sidebar';
+import { useSession } from "next-auth/react";
 
 
 interface HeaderProps {
@@ -15,7 +16,7 @@ interface HeaderProps {
 
 export function Header({ currentFolder }: HeaderProps) {
   const pathname = usePathname();
-  const router = useRouter();
+  const { data: session } = useSession();
 
   return (
     <header className="border-b bg-card sticky top-0 z-50">
@@ -38,7 +39,7 @@ export function Header({ currentFolder }: HeaderProps) {
         </div>
         <div className='flex items-center justify-center gap-4 md:pr-5'>
           <ThemeToggle />
-          <UserDropDown />
+          {session||true ? <UserDropDown /> : null}
         </div>
       </div>
     </header>
@@ -50,6 +51,7 @@ export function Header({ currentFolder }: HeaderProps) {
 import { LogOut, Settings, User } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from './ui/dropdown-menu';
 import { Avatar, AvatarFallback } from './ui/avatar';
+import { signOut } from 'next-auth/react';
 
 export default function UserDropDown() {
   const router = useRouter();
@@ -63,13 +65,13 @@ export default function UserDropDown() {
       <DropdownMenuContent>
         <DropdownMenuLabel>My Account</DropdownMenuLabel>
         <DropdownMenuSeparator />
-        <DropdownMenuItem>
+        <DropdownMenuItem className='cursor-pointer'>
           <User className="h-4 w-4" /> Profile
         </DropdownMenuItem>
-        <DropdownMenuItem>
+        <DropdownMenuItem className='cursor-pointer'>
           <Settings className="h-4 w-4" /> Settings
         </DropdownMenuItem>
-        <DropdownMenuItem className="text-destructive">
+        <DropdownMenuItem className="text-destructive cursor-pointer" onClick={() => signOut({ callbackUrl: "/login" })}>
           <LogOut className="h-4 w-4" /> Logout
         </DropdownMenuItem>
       </DropdownMenuContent>
