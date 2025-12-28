@@ -39,7 +39,7 @@ export default function FolderPageClient({ id }: FolderPageClientProps) {
     if (singleFolderLoading) return <PageMainAreaSkeleton />
 
     return (
-        <div className="flex h-[calc(100vh-80px)]">
+        <div className="flex h-[calc(100vh-60px)]">
             <div className="flex-1 overflow-y-auto">
                 <div className="px-6 py-8">
                     

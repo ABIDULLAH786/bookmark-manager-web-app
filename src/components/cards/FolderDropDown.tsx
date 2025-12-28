@@ -133,11 +133,11 @@ export function FolderDropDown({ folder }: FolderDropDownProps) {
       {/* --- Dropdown Menu --- */}
       <DropdownMenu modal={false}>
         <DropdownMenuTrigger asChild>
-          <Button variant="ghost" aria-label="Open menu" size="icon-sm" className="h-8 w-8">
+          <Button variant="ghost" aria-label="Open menu" size="icon-sm" className="h-8 w-8 bg-surface">
             <MoreVertical className="h-4 w-4" />
           </Button>
         </DropdownMenuTrigger>
-        <DropdownMenuContent className="w-40" align="end">
+        <DropdownMenuContent className="w-40 bg-surface" align="end">
           <DropdownMenuLabel>File Actions</DropdownMenuLabel>
           <DropdownMenuGroup>
             <DropdownMenuItem onSelect={() => setShowUpdateDialog(true)} className="cursor-pointer">

@@ -31,7 +31,7 @@ export default async function RootLayout({
   const defaultOpen = cookieStore.get("sidebar_state")?.value === "true"
 
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
        <head>
         <link rel="icon" href="favicon.ico" sizes="any" />
         <link rel="preconnect" href="https://fonts.googleapis.com/" />

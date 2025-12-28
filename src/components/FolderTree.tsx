@@ -16,6 +16,7 @@ import { useFolderStore } from '@/store/folders.store';
 import { useFoldersTreeStore } from '@/store/folderTree.store';
 import { IFolderTreeClient } from '@/types';
 import { FolderTreeSkeleton } from './loaders/FolderTreeSkeleton';
+import { cn } from '@/lib/utils';
 
 // --- Helper Functions ---
 /**
@@ -32,7 +33,6 @@ const isActivePath = (folder: IFolderTreeClient, activeId: string): boolean => {
 };
 
 // --- Components ---
-
 // 1. Recursive Folder Item Component
 const FolderItem = ({
   folder,
@@ -54,72 +54,62 @@ const FolderItem = ({
 
   // --- Auto-Expand Lifecycle ---
   useEffect(() => {
-    // Expand if:
-    // 1. One of my children is the active folder
-    // 2. OR: I am the active folder (so I show my own children)
     if (hasChildren && (isActivePath(folder, activeId) || activeId === folder._id)) {
       setIsOpen(true);
     }
   }, [activeId, folder, hasChildren]);
 
   // --- Handlers ---
-
-  // Handler for clicking the Main Row (Name/Icon)
   const handleSelect = (e: React.MouseEvent) => {
     e.stopPropagation();
-
-    // UI Decision: Clicking the name should SELECT and OPEN.
-    // It should NOT toggle close. To close, use the Chevron.
     if (hasChildren) {
       setIsOpen(true);
     }
-
+    if(isSelected){
+      setIsOpen(!isOpen);
+    }
     onSelect(folder._id);
     router.push(`/dashboard/folder/${folder._id}`);
   };
 
-  // Handler for clicking the Chevron (Arrow) only
   const handleToggleClick = (e: React.MouseEvent) => {
     e.stopPropagation();
-    // This allows the user to close the folder manually without changing selection
-    setIsOpen(!isOpen);
+      setIsOpen(!isOpen);
+    
   };
 
   return (
     <div className="select-none">
       <div
         className={`
-          group flex items-center pr-3 py-1.5 my-0.5
+          flex items-center pr-3 py-1.5 my-0.5
           text-sm font-medium rounded-md cursor-pointer transition-colors duration-200
           ${isSelected
-            ? 'bg-slate-100 text-slate-900 dark:bg-slate-800 dark:text-slate-100'
-            : 'text-slate-600 hover:bg-slate-50 dark:text-slate-400 dark:hover:bg-slate-800/50'}
+            ? 'bg-slate-100 text-slate-900 hover:bg-slate-100/80  '
+            : 'text-foreground hover:bg-slate-100 hover:text-foreground/80 dark:hover:bg-slate-700/80'}
         `}
         style={{ paddingLeft }}
-        onClick={handleSelect} // Main click triggers selection & open
+        onClick={handleSelect} 
       >
-        {/* Chevron / Spacer */}
         <span
           className={`
             mr-1 flex items-center justify-center w-4 h-4 rounded-sm 
-            hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors z-10
+              transition-colors z-10
             ${hasChildren ? 'visible' : 'invisible'}
           `}
-          onClick={handleToggleClick} // Specific click triggers toggle
+          onClick={handleToggleClick} 
         >
           {isOpen ? (
-            <ChevronDown size={14} className="text-slate-400" />
+            <ChevronDown size={14} className={cn(isSelected?"text-slate-900 ":"text-slate-900 dark:text-slate-100 ")} />
           ) : (
-            <ChevronRight size={14} className="text-slate-400" />
+            <ChevronRight size={14} className={cn(isSelected?"text-slate-900 ":"text-slate-900 dark:text-slate-100 ")}  />
           )}
         </span>
 
-        {/* Icon */}
-        <span className="mr-2 text-slate-400 group-hover:text-slate-500 dark:text-slate-500 dark:group-hover:text-slate-300">
+        <span className="mr-2 ">
           {isOpen && hasChildren ? <FolderOpen size={16} /> : <Folder size={16} />}
         </span>
 
-        {/* Name */}
         <span className="truncate flex-1">{folder.name}</span>
       </div>
 
@@ -141,7 +131,7 @@ const FolderItem = ({
   );
 };
 
-// 2. Main Sidebar Component
+// Main Sidebar Component
 export default function FolderTree() {
   const { id } = useParams();
   const router = useRouter();
@@ -183,11 +173,11 @@ export default function FolderTree() {
             flex items-center px-3 py-2 text-sm font-medium rounded-md cursor-pointer
             transition-colors duration-200 mb-4
             ${activeFolderId === "all"
-              ? 'bg-slate-100 text-slate-900 dark:bg-slate-800 dark:text-slate-100'
+              ? 'bg-surface text-surface-foreground dark:bg-surface/50 dark:text-surface-foreground'
               : 'text-slate-600 hover:bg-slate-50 dark:text-slate-400 dark:hover:bg-slate-800/50'}
           `}
         >
-          <Home size={16} className="mr-3 text-slate-400" />
+          <Home size={16} className="mr-3 " />
           All Bookmarks
         </div>
       </div>

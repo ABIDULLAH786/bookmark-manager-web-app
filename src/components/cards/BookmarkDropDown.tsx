@@ -116,13 +116,13 @@ export function BookmarkDropDown({ bookmark }: BookmarkDropDownProps) {
   return (
     <>
       {/* --- Dropdown Menu --- */}
-      <DropdownMenu modal={false}>
+      <DropdownMenu modal={false} >
         <DropdownMenuTrigger asChild>
-          <Button variant="ghost" aria-label="Open menu" size="icon-sm" className="h-8 w-8">
+          <Button variant="ghost" aria-label="Open menu" size="icon-sm" className="h-8 w-8 hover:bg-surface/50">
             <MoreVertical className="h-4 w-4" />
           </Button>
         </DropdownMenuTrigger>
-        <DropdownMenuContent className="w-40" align="end">
+        <DropdownMenuContent className="w-40 bg-surface shadow-sm border" align="end">
           <DropdownMenuLabel>Bookmark Actions</DropdownMenuLabel>
           <DropdownMenuGroup>
             <DropdownMenuItem onSelect={() => setShowUpdateDialog(true)} className="cursor-pointer">
