@@ -24,11 +24,11 @@ export const authOptions: NextAuthOptions = {
                 await connectToDatabase();
                 // ⚠️ IMPORTANT: We must select the password field if it's hidden by default in your schema
                 const user = await User.findOne({ email: credentials.email }).select("+password");
-
+                console.log("Logged in user: ", user)
                 if (!user) {
                     throw new Error("No user found");
                 }
-
+                
                 let isValidPassword = false;
 
                 isValidPassword = await bcrypt.compare(credentials.password, user.password);

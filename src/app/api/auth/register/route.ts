@@ -17,15 +17,12 @@ export const POST = apiHandler(async (request) => {
     if (existingUser)
         return NextResponse.json({ error: "Email already registered in system" }, { status: 400 })
 
-    const hashedPassword = await bcrypt.hash(password, 10); // Hash with salt rounds
-
     const newUser = await User.create({
         username: email.split("@")[0],
         email,
-        password: hashedPassword 
+        password 
     });
     
-
     return NextResponse.json({
         success: true,
         message: "User created successfully",
