@@ -8,7 +8,7 @@ export default withAuth(
   function middleware(req) {
     const { pathname } = req.nextUrl;
     const token = req.nextauth.token;
-
+    console.log("TOKEN_IS: ", token)
     // If user is logged-in and tries to access login/register, redirect to home
     if (token && (pathname === '/login' || pathname === '/register')) {
       return NextResponse.redirect(new URL('/dashboard', req.url));
@@ -17,6 +17,7 @@ export default withAuth(
     // Otherwise, continue to the requested page
     return NextResponse.next();
   },
+
   {
     callbacks: {
       // This 'authorized' callback runs FIRST.

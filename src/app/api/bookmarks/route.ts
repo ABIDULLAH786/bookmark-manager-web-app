@@ -10,19 +10,20 @@ export async function GET() {
   try {
     await connectToDatabase();
 
-    // 3. SECURITY: Authenticate
+    // SECURITY: Authenticate
     const session = await getServerSession(authOptions);
+    console.log("ACTIVE_SESSION: ", session);
     if (!session || !session.user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     const userId = (session.user as any).id;
 
-    // 4. FILTER: Only fetch root bookmarks (no folder) belonging to THIS user
+    // FILTER: Only fetch root bookmarks (no folder) belonging to THIS user
     const bookmarks = await bookmarkModel
       .find({ 
         parentFolder: null, 
-        userId: userId // <--- Critical User Filter
+        createdBy: userId 
       })
       .sort({ createdAt: -1 });
 

@@ -52,7 +52,7 @@ export default function FolderPageClient({ id }: FolderPageClientProps) {
                             <TooltipProvider>
                                 <Tooltip>
                                     <TooltipTrigger asChild>
-                                        <h2 className="text-2xl font-semibold truncate cursor-default">
+                                        <h2 className="text-2xl font-semibold truncate cursor-default w-fit">
                                             {singleSelectedFolder ? singleSelectedFolder.name : 'All Bookmarks'}
                                         </h2>
                                     </TooltipTrigger>
@@ -66,11 +66,11 @@ export default function FolderPageClient({ id }: FolderPageClientProps) {
                                 <TooltipProvider>
                                     <Tooltip>
                                         <TooltipTrigger asChild>
-                                            <p className="text-muted-foreground truncate cursor-default">
+                                            <p className="text-muted-foreground truncate cursor-default w-fit">
                                                 {singleSelectedFolder.description}
                                             </p>
                                         </TooltipTrigger>
-                                        <TooltipContent className="max-w-sm wrap-break-word">
+                                        <TooltipContent className="max-w-sm wrap-break-word" side='bottom'>
                                             <p>{singleSelectedFolder.description}</p>
                                         </TooltipContent>
                                     </Tooltip>

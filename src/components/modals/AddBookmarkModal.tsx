@@ -13,8 +13,6 @@ import { IError } from '@/types/error';
 import { cn } from "@/lib/utils"; // Import utility for class merging
 import { MAX_DESC_LENGTH, MAX_TITLE_LENGTH } from '@/constants';
 
-// 1. Define Limits
-
 interface AddBookmarkModalProps {
   open: boolean;
   onClose: () => void;
@@ -34,7 +32,6 @@ export function AddBookmarkModal({ open, onClose, parentFolderId }: AddBookmarkM
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
-  // 2. Validation Helpers
   const isTitleInvalid = title.length > MAX_TITLE_LENGTH;
   const isDescInvalid = description.length > MAX_DESC_LENGTH;
 
@@ -47,7 +44,7 @@ export function AddBookmarkModal({ open, onClose, parentFolderId }: AddBookmarkM
         return router.push("/login");
     }
 
-    // 3. Validation Check on Submit
+    // Validation Check on Submit
     if (isTitleInvalid) {
         setErrorMsg(`Title cannot exceed ${MAX_TITLE_LENGTH} characters.`);
         return;

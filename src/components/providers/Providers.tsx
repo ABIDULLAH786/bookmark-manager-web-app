@@ -14,15 +14,8 @@ export default function Providers({ children }: { children: React.ReactNode }) {
 
 
     // Define routes where you want to show the Header
-    // const showHeaderRoutes = ["/", "/videos"];
     const excludeHeader = ["/login", "/register", "/"];
     const showHeader = !excludeHeader.includes(pathname);
-
-    // Same as above two lines
-    // Show header on these routes:
-    // const showHeader =
-    //     pathname === "/" ||
-    //     pathname.startsWith("/private-page")
 
     return (
         <AuthProvider>

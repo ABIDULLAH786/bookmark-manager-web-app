@@ -56,15 +56,8 @@ export default async function RootLayout({
             zIndex={1600}
             showAtBottom={false}
           />
-
-          {/* FIX APPLIED BELOW:
-              1. Removed the nested <main> tag (SidebarInset is already a main).
-              2. Added 'min-w-0' (CRITICAL) to force flexbox shrinking.
-              3. Added 'overflow-hidden' to handle scrollbars correctly. 
-          */}
             <Toaster />
             <Providers>{children}</Providers>
-
         </SidebarProvider>
       </body>
     </html>

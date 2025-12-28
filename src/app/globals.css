@@ -78,6 +78,7 @@
   --sidebar-accent-foreground: #fafafa;
   --sidebar-border: #27272a;
   --sidebar-ring: #d4d4d8;
+  color-scheme: dark;
 }
 
 @theme inline {
@@ -233,8 +234,39 @@
   }
 }
 
-/* src/app/globals.css */
+/* ---------------- CUSTOM SCROLLBAR START ---------------- */
+@layer base {
+  /* Chrome, Edge, and Safari */
+  *::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
 
+  *::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  *::-webkit-scrollbar-thumb {
+    /* Uses your theme variable: #e4e4e7 in Light, #27272a in Dark */
+    background-color: var(--border); 
+    border-radius: 10px;
+    border: 2px solid transparent; /* Creates a nice padding effect */
+    background-clip: content-box;
+  }
+
+  *::-webkit-scrollbar-thumb:hover {
+    background-color: var(--muted-foreground); 
+  }
+
+  /* Firefox */
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: var(--border) transparent;
+  }
+}
+/* ---------------- CUSTOM SCROLLBAR END ---------------- */
+
+/* src/app/globals.css utilities */
 @layer utilities {
   .animation-delay-2000 {
     animation-delay: 2s;
@@ -257,4 +289,3 @@ html {
 .no-scrollbar {
   scrollbar-width: none;
 }
-

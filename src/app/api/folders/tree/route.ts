@@ -1,7 +1,5 @@
 import { NextResponse } from "next/server";
-import mongoose from "mongoose";
 import FolderModel from "@/models/folder.model";
-import { USER_ID } from "@/constants";
 import { connectToDatabase } from "@/lib/db";
 import { authOptions } from "@/lib/auth";
 import { getServerSession } from "next-auth";
@@ -53,7 +51,7 @@ export async function GET(req: Request) {
     }
 
     // We cast as 'any' because default types might not show 'id' yet
-    const userId = (session.user as any).id ?? USER_ID;
+    const userId = (session.user as any).id;
 
     if (!userId) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });

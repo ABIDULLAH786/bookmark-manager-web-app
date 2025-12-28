@@ -35,7 +35,7 @@ export async function GET(req: NextRequest, { params }: Params) {
   }
 
   // 3. Find Direct Bookmarks (Belonging to this user)
-  const bookmarks = await Bookmark.find({ parentFolder: id, userId: userId }) // <--- User Filter
+  const bookmarks = await Bookmark.find({ parentFolder: id, createdBy: userId }) // <--- User Filter
     .select(EXCLUDE_FIELDS)
     .lean();
 
