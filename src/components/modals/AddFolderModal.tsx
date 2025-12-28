@@ -4,16 +4,16 @@ import { Label } from '@radix-ui/react-label';
 import { Input } from '../ui/input';
 import { Button } from '../ui/button';
 import { Textarea } from '../ui/textarea';
-import { IFolderClient } from '@/types/folder';
-import { useSession } from "next-auth/react"; 
+import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
-import { mutate } from 'swr';
 import { fetcher } from '@/helper/fetcher';
 import { IError } from '@/types/error';
 import { useFolderStore } from '@/store/folders.store';
 import { API_PATHS } from '@/lib/apiPaths';
 import { HTTP_METHOD } from 'next/dist/server/web/http';
 import { useFoldersTreeStore } from '@/store/folderTree.store';
+import { cn } from "@/lib/utils"; // Standard shadcn utility for class merging
+import { MAX_DESC_LENGTH, MAX_TITLE_LENGTH } from '@/constants';
 
 interface AddFolderModalProps {
   open: boolean;
@@ -22,34 +22,46 @@ interface AddFolderModalProps {
 }
 
 export function AddFolderModal({ open, onClose, parentFolderId }: AddFolderModalProps) {
-  // 2. Initialize Hooks
   const { data: session, status } = useSession();
-  console.log("session: ", session)
   const router = useRouter();
 
   const { addFolder, addSubFolderToSelected } = useFolderStore();
   const { addFolderToTree } = useFoldersTreeStore();
+  
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
+  // 2. Validation Helpers
+  const isNameInvalid = name.length > MAX_TITLE_LENGTH;
+  const isDescInvalid = description.length > MAX_DESC_LENGTH;
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    // 3. Security Check: Redirect if not authenticated
+
     if (status === "unauthenticated" || !session?.user) {
-        // Optional: Close modal before redirecting
-        onClose(); 
-        return router.push("/login");
+      onClose();
+      return router.push("/login");
     }
 
+    // 3. Validation Check on Submit
+    if (isNameInvalid) {
+      setErrorMsg(`Folder name cannot exceed ${MAX_TITLE_LENGTH} characters.`);
+      return;
+    }
+    if (isDescInvalid) {
+      setErrorMsg(`Description cannot exceed ${MAX_DESC_LENGTH} characters.`);
+      return;
+    }
     if (!name.trim()) return;
+
     setLoading(true);
+    setErrorMsg(null); // Clear previous errors
 
     try {
       const { url, method } = API_PATHS.FOLDERS.CREATE();
-      
+
       const res = await fetcher([
         url,
         {
@@ -59,40 +71,30 @@ export function AddFolderModal({ open, onClose, parentFolderId }: AddFolderModal
             description,
             parentFolder: parentFolderId,
             createdAt: new Date(),
-            // 4. Use the real ID from session
-            // Note: We use 'as any' here because standard NextAuth types might not show 'id' yet
-            createdBy: (session.user as any).id 
+            createdBy: (session.user as any).id
           },
         },
       ]);
 
-      console.log("Folder added: ", res);
-      
       const updateFolderData = {
         ...res,
-        stats: {
-          subFolders: 0,
-          bookmarks: 0,
-          totalItems: 0
-        }
+        stats: { subFolders: 0, bookmarks: 0, totalItems: 0 }
       };
 
       if (parentFolderId) {
         addSubFolderToSelected(updateFolderData);
-      } 
+      }
       addFolder(updateFolderData);
-      
+
       addFolderToTree({
         _id: updateFolderData._id,
         name: updateFolderData.name,
-        children:[],
+        children: [],
         parentFolder: updateFolderData.parentFolder
       });
 
-      setName("");
-      setDescription("");
-      onClose();
-      
+      handleClose();
+
     } catch (err: IError | any) {
       console.log("Error body:", err.body);
       setErrorMsg(err?.body?.errors[0] ?? err.body?.message ?? "Something went wrong");
@@ -104,8 +106,8 @@ export function AddFolderModal({ open, onClose, parentFolderId }: AddFolderModal
   const handleClose = () => {
     setName('');
     setDescription('');
-    onClose();
     setErrorMsg(null);
+    onClose();
   };
 
   return (
@@ -115,35 +117,65 @@ export function AddFolderModal({ open, onClose, parentFolderId }: AddFolderModal
           <DialogTitle>Add New Folder</DialogTitle>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
+          
+          {/* --- NAME INPUT --- */}
           <div className="space-y-2">
-            <Label htmlFor="folder-name">Name *</Label>
+            <div className="flex justify-between items-center">
+                <Label htmlFor="folder-name">Name *</Label>
+                <span className={cn("text-xs", isNameInvalid ? "text-red-500 font-bold" : "text-muted-foreground")}>
+                    {name.length}/{MAX_TITLE_LENGTH}
+                </span>
+            </div>
             <Input
               id="folder-name"
               value={name}
-              onChange={(e) => setName(e.target.value)}
+              onChange={(e) => {
+                  setName(e.target.value);
+                  if (errorMsg) setErrorMsg(null);
+              }}
               placeholder="Enter folder name"
               required
+              // 4. Conditional Styling for Red Border
+              className={cn(
+                  isNameInvalid && "border-red-500 focus-visible:ring-red-500"
+              )}
             />
           </div>
+
+          {/* --- DESCRIPTION INPUT --- */}
           <div className="space-y-2">
-            <Label htmlFor="folder-description">Description</Label>
+             <div className="flex justify-between items-center">
+                <Label htmlFor="folder-description">Description</Label>
+                <span className={cn("text-xs", isDescInvalid ? "text-red-500 font-bold" : "text-muted-foreground")}>
+                    {description.length}/{MAX_DESC_LENGTH}
+                </span>
+            </div>
             <Textarea
               id="folder-description"
               value={description}
-              onChange={(e) => setDescription(e.target.value)}
+              onChange={(e) => {
+                  setDescription(e.target.value);
+                  if (errorMsg) setErrorMsg(null);
+              }}
               placeholder="Optional description"
               rows={3}
+              // 4. Conditional Styling for Red Border
+              className={cn(
+                  isDescInvalid && "border-red-500 focus-visible:ring-red-500"
+              )}
             />
           </div>
+
           <DialogFooter className='flex items-center justify-between!'>
-            <div className=''>
+            <div className='flex-1 pr-2'>
               {errorMsg && <p className="text-red-500 text-sm font-semibold">{errorMsg}</p>}
             </div>
-            <div>
+            <div className="flex gap-2">
               <Button type="button" variant="outline" onClick={handleClose}>
                 Cancel
               </Button>
-              <Button type="submit" disabled={!name.trim() || loading}>
+              {/* Disable button if invalid to prevent clicking entirely (Optional UX choice) */}
+              <Button type="submit" disabled={!name.trim() || loading || isNameInvalid || isDescInvalid}>
                 {loading ? "Creating..." : "Create Folder"}
               </Button>
             </div>

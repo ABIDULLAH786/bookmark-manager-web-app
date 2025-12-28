@@ -3,19 +3,23 @@
 import { FolderCard } from '@/components/cards/FolderCard';
 import { AddCard } from '@/components/cards/AddCard';
 import { BookmarkCard } from '@/components/cards/BookmarkCard';
-
 import { useModal } from '@/components/providers/ModalProvider';
 import useSWR from 'swr';
 import { fetcher } from '@/helper/fetcher';
 import { IFolderClient } from '@/types/folder';
 import { IBookmarkClient } from '@/types/bookmark';
-import FolderTree from '../FolderTree';
 import { Card } from '../cards/Card';
 import { Separator } from '../ui/separator';
 import { useEffect } from 'react';
 import { useFolderStore } from '@/store/folders.store';
 import { API_PATHS } from '@/lib/apiPaths';
 import { PageMainAreaSkeleton } from '../loaders/FolderPageSkeleton';
+import {
+    Tooltip,
+    TooltipContent,
+    TooltipProvider,
+    TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 interface FolderPageClientProps {
     id: string;
@@ -24,9 +28,6 @@ interface FolderPageClientProps {
 export default function FolderPageClient({ id }: FolderPageClientProps) {
     const { setSingleSelectedFolder, singleSelectedFolder } = useFolderStore()
     const { data: singleFolder, error: singleFolderError, isLoading: singleFolderLoading } = useSWR([API_PATHS.FOLDERS.DETAIL(id).url, {}], fetcher);
-
-    console.log({ singleFolder })
-    console.log({ SubFolderbookmarks: singleFolder?.bookmarks })
     const { openAddFolder, openAddBookmark } = useModal();
 
     useEffect(() => {
@@ -34,36 +35,56 @@ export default function FolderPageClient({ id }: FolderPageClientProps) {
             setSingleSelectedFolder(singleFolder)
     }, [singleFolder])
 
-    if (singleFolderError) {
-        console.error(singleFolderError)
-    }
-    if (singleFolderLoading) {
-        return <PageMainAreaSkeleton />
-    }
+    if (singleFolderError) console.error(singleFolderError)
+    if (singleFolderLoading) return <PageMainAreaSkeleton />
+
     return (
         <div className="flex h-[calc(100vh-80px)]">
-            {/* Main Content */}
             <div className="flex-1 overflow-y-auto">
                 <div className="px-6 py-8">
-                    {/* Heading */}
-                    <Card className='md:flex flex-row items-center justify-between border-none'>
+                    
+                    {/* --- HEADER SECTION START --- */}
+                    <Card className='md:flex flex-row items-center justify-between border-none gap-10'>
+                        
+                        {/* Left Side: Text (Name & Description) */}
+                        <div className="flex-1 min-w-0">
+                            
+                            <TooltipProvider>
+                                <Tooltip>
+                                    <TooltipTrigger asChild>
+                                        <h2 className="text-2xl font-semibold truncate cursor-default">
+                                            {singleSelectedFolder ? singleSelectedFolder.name : 'All Bookmarks'}
+                                        </h2>
+                                    </TooltipTrigger>
+                                    <TooltipContent>
+                                        <p>{singleSelectedFolder ? singleSelectedFolder.name : 'All Bookmarks'}</p>
+                                    </TooltipContent>
+                                </Tooltip>
+                            </TooltipProvider>
 
-                        <div className="">
-                            <h2 className="text-2xl font-semibold">
-                                {singleSelectedFolder ? singleSelectedFolder.name : 'All Bookmarks'}
-                            </h2>
                             {singleSelectedFolder?.description && (
-                                <p className="text-muted-foreground">{singleSelectedFolder.description}</p>
+                                <TooltipProvider>
+                                    <Tooltip>
+                                        <TooltipTrigger asChild>
+                                            <p className="text-muted-foreground truncate cursor-default">
+                                                {singleSelectedFolder.description}
+                                            </p>
+                                        </TooltipTrigger>
+                                        <TooltipContent className="max-w-sm wrap-break-word">
+                                            <p>{singleSelectedFolder.description}</p>
+                                        </TooltipContent>
+                                    </Tooltip>
+                                </TooltipProvider>
                             )}
-
                         </div>
-                        <div className='md:flex gap-3'>
-                            {/* TODOS: add the small btn on the heading of the page  */}
+
+                        {/* Right Side: Buttons */}
+                        <div className='flex flex-col md:flex-row gap-1 md:gap-3 shrink-0'>
                             <AddCard type="folder" onClick={() => openAddFolder(id)} />
                             <AddCard type="bookmark" onClick={() => openAddBookmark(id)} />
-
                         </div>
                     </Card>
+
                     <Separator className="mt-4 mb-8" />
 
                     {/* Subfolders */}
@@ -72,10 +93,7 @@ export default function FolderPageClient({ id }: FolderPageClientProps) {
                             <h3 className="text-lg font-medium mb-4">Folders</h3>
                             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                                 {singleSelectedFolder?.subFolders?.map((folder: IFolderClient) => (
-                                    <FolderCard
-                                        key={folder._id}
-                                        folder={folder}
-                                    />
+                                    <FolderCard key={folder._id} folder={folder} />
                                 ))}
                             </div>
                         </div>
@@ -94,7 +112,6 @@ export default function FolderPageClient({ id }: FolderPageClientProps) {
                     </div>
                 </div>
             </div>
-
         </div>
     );
 }

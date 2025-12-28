@@ -3,53 +3,62 @@ import Folder from "@/models/folder.model";
 import Bookmark from "@/models/bookmark.model";
 import { NextRequest, NextResponse } from "next/server";
 import { apiError } from "@/lib/apiError";
+import { getServerSession } from "next-auth"; // 1. Import Session
+import { authOptions } from "@/lib/auth";
 
 interface Params {
   params: Promise<{ id: string }>;
 }
 
-
 // Helper to exclude standard irrelevant fields
 const EXCLUDE_FIELDS = "-__v -sharedWith -isFavoriteBy -createdBy";
 
+// ✅ GET — Fetch Folder (Secured)
 export async function GET(req: NextRequest, { params }: Params) {
-
   await connectToDatabase();
-
+  
+  // 1. SECURITY: Authenticate
+  const session = await getServerSession(authOptions);
+  if (!session || !session.user) {
+    return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
+  }
+  const userId = (session.user as any).id;
   const { id } = await params;
 
-  // 1. Find the Main Folder (Root)
-  // We use .select() to remove fields not needed for the header
-  const folder = await Folder.findById(id)
-    .select(EXCLUDE_FIELDS) 
+  // 2. Find Main Folder (Ensure ownership)
+  const folder = await Folder.findOne({ _id: id, createdBy: userId }) // <--- User Filter
+    .select(EXCLUDE_FIELDS)
     .lean();
 
   if (!folder) {
     return NextResponse.json({ message: "Folder not found" }, { status: 404 });
   }
 
-  // 2. Find Direct Bookmarks
-  const bookmarks = await Bookmark.find({ parentFolder: id })
+  // 3. Find Direct Bookmarks (Belonging to this user)
+  const bookmarks = await Bookmark.find({ parentFolder: id, userId: userId }) // <--- User Filter
     .select(EXCLUDE_FIELDS)
     .lean();
 
-  // 3. Find Direct Subfolders
-  const subFolders = await Folder.find({ parentFolder: id })
+  // 4. Find Direct Subfolders (Belonging to this user)
+  const subFolders = await Folder.find({ parentFolder: id, createdBy: userId }) // <--- User Filter
     .select(EXCLUDE_FIELDS)
     .lean();
 
-  // 4. Calculate Counts for the Subfolder Cards (Lightweight)
-  // Instead of fetching the actual children arrays, we just COUNT them.
-  // This drastically reduces payload size.
+  // 5. Calculate Counts (Scoped to User)
   const formattedSubFolders = await Promise.all(
     subFolders.map(async (sub) => {
-      const subFolderCount = await Folder.countDocuments({ parentFolder: sub._id });
-      const bookmarkCount = await Bookmark.countDocuments({ parentFolder: sub._id });
+      // Count only items created by this user
+      const subFolderCount = await Folder.countDocuments({ 
+        parentFolder: sub._id, 
+        createdBy: userId 
+      });
+      const bookmarkCount = await Bookmark.countDocuments({ 
+        parentFolder: sub._id, 
+        userId: userId 
+      });
 
       return {
         ...sub,
-        // Notice: We are NOT returning 'subFolders' or 'bookmarks' arrays here. 
-        // Just the stats.
         stats: {
           subFolders: subFolderCount,
           bookmarks: bookmarkCount,
@@ -59,10 +68,8 @@ export async function GET(req: NextRequest, { params }: Params) {
     })
   );
 
-  // 5. Construct Final Response
-  // We flatten the structure. No need for 'currentFolder' key.
   const responseData = {
-    ...folder, // Spreads _id, name, description, etc.
+    ...folder,
     subFolders: formattedSubFolders,
     bookmarks,
     stats: {
@@ -79,79 +86,107 @@ export async function GET(req: NextRequest, { params }: Params) {
   }, { status: 200 });
 }
 
+// ✅ POST — Create Subfolder (Secured)
 export async function POST(req: Request, { params }: Params) {
   await connectToDatabase();
+  
+  // 1. SECURITY: Authenticate
+  const session = await getServerSession(authOptions);
+  if (!session || !session.user) {
+    return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
+  }
+  const userId = (session.user as any).id;
 
   try {
-    const { id: parentFolderId } = await params; // parent folder ID
+    const { id: parentFolderId } = await params; 
     const body = await req.json();
 
-    // Validate name
     if (!body.name || typeof body.name !== "string") {
-      return NextResponse.json(
-        { message: "Folder name is required" },
-        { status: 400 }
-      );
+      return NextResponse.json({ message: "Folder name is required" }, { status: 400 });
     }
 
-    // Check if parent exists (optional but recommended)
-    const parentFolder = await Folder.findById(parentFolderId);
+    // 2. SECURITY: Check if PARENT exists and belongs to USER
+    const parentFolder = await Folder.findOne({ 
+      _id: parentFolderId, 
+      createdBy: userId // <--- Critical Check
+    });
+
     if (!parentFolder) {
-      return NextResponse.json(
-        { message: "Parent folder not found" },
-        { status: 404 }
-      );
+      return NextResponse.json({ message: "Parent folder not found or access denied" }, { status: 404 });
     }
 
-    // Create the subfolder with reference to parent
+    // 3. Create Subfolder (Force createdBy to match session)
     const newFolder = await Folder.create({
       name: body.name,
       description: body.description || "",
-      parentFolder: parentFolderId, // ✅ link to parent
+      parentFolder: parentFolderId,
+      createdBy: userId, // <--- Force ID
       createdAt: new Date(),
     });
-      return NextResponse.json({ success: true, data:newFolder, message: "Folder created successfully" }, { status: 201 });
+
+    return NextResponse.json({ success: true, data: newFolder, message: "Folder created successfully" }, { status: 201 });
 
   } catch (err: any) {
     console.error("Error creating folder:", err);
-    console.log("err.name: ", err.name)
-    // Mongoose validation errors
     if (err.name === "ValidationError") {
       const messages = Object.values(err.errors).map((e: any) => e.message);
       return apiError(400, "Validation failed", messages);
     }
-
-    // Default fallback
     return apiError(500, err.message || "Internal Server error");
   }
 }
 
-
-// ✅ PATCH — Update folder
+// ✅ PATCH — Update folder (Secured)
 export async function PATCH(req: Request, { params }: Params) {
   await connectToDatabase();
+  
+  // 1. SECURITY: Authenticate
+  const session = await getServerSession(authOptions);
+  if (!session || !session.user) {
+    return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
+  }
+  const userId = (session.user as any).id;
+  
   const data = await req.json();
   const { id } = await params; 
 
-  const updated = await Folder.findByIdAndUpdate(id, data, { new: true });
-        return NextResponse.json({ success: true, data:updated, message: "Folder updated successfully" }, { status: 200 });
+  // 2. SECURITY: Update only if User owns it
+  const updated = await Folder.findOneAndUpdate(
+    { _id: id, createdBy: userId }, // <--- User Filter
+    data, 
+    { new: true }
+  );
 
+  if (!updated) {
+    return NextResponse.json({ message: "Folder not found or unauthorized" }, { status: 404 });
+  }
+
+  return NextResponse.json({ success: true, data: updated, message: "Folder updated successfully" }, { status: 200 });
 }
 
-// ✅ DELETE — Delete folder
+// ✅ DELETE — Delete folder (Secured)
 export async function DELETE(_: Request, { params }: Params) {
   await connectToDatabase();
+  
+  // 1. SECURITY: Authenticate
+  const session = await getServerSession(authOptions);
+  if (!session || !session.user) {
+    return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
+  }
+  const userId = (session.user as any).id;
   const { id } = await params;
 
   try {
-    // Check if folder exists first (optional, but good for validation)
-    const folderExists = await Folder.findById(id);
+    // 2. SECURITY: Check existence & Ownership
+    const folderExists = await Folder.findOne({ _id: id, createdBy: userId }); // <--- User Filter
+    
     if (!folderExists) {
-      return NextResponse.json({ message: "Folder not found" }, { status: 404 });
+      return NextResponse.json({ message: "Folder not found or unauthorized" }, { status: 404 });
     }
 
-    // Run the recursive cleanup
-    await deleteFolderRecursively(id);
+    // 3. Run recursive cleanup
+    // Pass userId to ensure we only clean up user's own data (double safety)
+    await deleteFolderRecursively(id, userId);
 
     return NextResponse.json({ 
       success: true, 
@@ -160,28 +195,23 @@ export async function DELETE(_: Request, { params }: Params) {
 
   } catch (error) {
     console.error("Delete Error:", error);
-    return NextResponse.json({ 
-      success: false, 
-      message: "Failed to delete folder" 
-    }, { status: 500 });
+    return NextResponse.json({ success: false, message: "Failed to delete folder" }, { status: 500 });
   }
 }
 
+// --- Helper: Recursive Delete Function (Secured) ---
+const deleteFolderRecursively = async (folderId: string, userId: string) => {
+  // 1. Find all direct sub-folders belonging to user
+  const subFolders = await Folder.find({ parentFolder: folderId, createdBy: userId });
 
-// --- Helper: Recursive Delete Function ---
-const deleteFolderRecursively = async (folderId: string) => {
-  // 1. Find all direct sub-folders
-  const subFolders = await Folder.find({ parentFolder: folderId });
-
-  // 2. Recursively delete each sub-folder (and their contents)
-  // We use a loop to ensure operations complete in order
+  // 2. Recursively delete
   for (const subFolder of subFolders) {
-    await deleteFolderRecursively(subFolder._id);
+    await deleteFolderRecursively(subFolder._id.toString(), userId);
   }
 
-  // 3. Delete all bookmarks strictly inside THIS folder
-  await Bookmark.deleteMany({ parentFolder: folderId });
+  // 3. Delete bookmarks in this folder (Check userId for safety)
+  await Bookmark.deleteMany({ parentFolder: folderId, userId: userId });
 
   // 4. Delete the folder itself
-  await Folder.findByIdAndDelete(folderId);
+  await Folder.findOneAndDelete({ _id: folderId, createdBy: userId });
 };
