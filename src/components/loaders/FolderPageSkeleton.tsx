@@ -2,7 +2,7 @@ import { Separator } from "../ui/separator";
 
 export const PageMainAreaSkeleton = () => {
   return (
-    <div className="flex h-[calc(100vh-80px)] animate-pulse">
+    <div className="flex h-[calc(100vh-60px)] animate-pulse">
       <div className="flex-1 overflow-y-auto">
         <div className="px-6 py-8">
            

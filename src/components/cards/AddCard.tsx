@@ -20,7 +20,7 @@ export function AddCard({ type, onClick }: AddCardProps) {
           type="button"
           variant={"ghost"}
           onClick={onClick}
-          className="w-full flex items-center gap-2 px-4 py-2 rounded-md border border-dashed border-slate-300 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-900 transition-colors text-sm font-medium text-slate-600 dark:text-slate-300"
+          className="w-full flex items-center gap-2 px-4 py-2 rounded-md border border-dashed border-slate-300 dark:border-slate-700 hover:bg-surface/50 dark:hover:bg-surface/50 transition-colors text-sm font-medium text-slate-600 dark:text-slate-300"
         >
           <Plus size={16} />
           Add {type === 'folder' ? 'Folder' : 'Bookmark'}

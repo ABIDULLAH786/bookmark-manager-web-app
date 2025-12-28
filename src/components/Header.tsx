@@ -39,7 +39,7 @@ export function Header({ currentFolder }: HeaderProps) {
         </div>
         <div className='flex items-center justify-center gap-4 md:pr-5'>
           <ThemeToggle />
-          {session||true ? <UserDropDown /> : null}
+          {session || true ? <UserDropDown /> : null}
         </div>
       </div>
     </header>
@@ -54,7 +54,8 @@ import { Avatar, AvatarFallback } from './ui/avatar';
 import { signOut } from 'next-auth/react';
 
 export default function UserDropDown() {
-  const router = useRouter();
+  const { data: session } = useSession();
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger className="cursor-pointer focus:outline-hidden focus:ring-2 focus:ring-offset focus:ring-primary rounded-full">
@@ -62,8 +63,11 @@ export default function UserDropDown() {
           <AvatarFallback>A</AvatarFallback>
         </Avatar>
       </DropdownMenuTrigger>
-      <DropdownMenuContent>
-        <DropdownMenuLabel>My Account</DropdownMenuLabel>
+      <DropdownMenuContent className='bg-surface'>
+        <DropdownMenuLabel className='text-muted-foreground'>
+          <span > User:</span>
+           <span> {session?.user?.name ?? session?.user?.email?.split("@")[0]}</span>
+        </DropdownMenuLabel>
         <DropdownMenuSeparator />
         <DropdownMenuItem className='cursor-pointer'>
           <User className="h-4 w-4" /> Profile
