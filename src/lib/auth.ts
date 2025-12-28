@@ -16,36 +16,33 @@ export const authOptions: NextAuthOptions = {
                 email: { label: "Email", type: "text" },
                 password: { label: "Password", type: "passsword" },
             },
-            async authorize(credentials: Record<string, string> | undefined) {
+            async authorize(credentials) {
                 if (!credentials?.email || !credentials?.password) {
-                    throw new Error("Missing email or passsword");
+                    throw new Error("Missing email or password");
                 }
 
-                try {
-                    await connectToDatabase();
-                    const user = await User.findOne({ email: credentials.email });
+                await connectToDatabase();
+                // ⚠️ IMPORTANT: We must select the password field if it's hidden by default in your schema
+                const user = await User.findOne({ email: credentials.email }).select("+password");
 
-                    if (!user) {
-                        throw new Error("No user found with this");
-                    }
-                    console.log("UserData: ", { user })
-                    const isValid = await bcrypt.compare(
-                        credentials.password,
-                        user.password
-                    );
-
-                    if (!isValid) {
-                        throw new Error("invalid password");
-                    }
-
-                    return {
-                        id: user._id.toString(),
-                        email: user.email,
-                    };
-                } catch (error) {
-                    console.error("Auth error: ", error);
-                    throw error;
+                if (!user) {
+                    throw new Error("No user found");
                 }
+
+                let isValidPassword = false;
+
+                isValidPassword = await bcrypt.compare(credentials.password, user.password);
+
+                if (!isValidPassword) {
+                    throw new Error("Invalid password...");
+                }
+
+                return {
+                    id: user._id.toString(),
+                    email: user.email,
+                    name: user?.name, // optional
+                    image: user?.image, // optional
+                };
             },
         }),
         GoogleProvider({

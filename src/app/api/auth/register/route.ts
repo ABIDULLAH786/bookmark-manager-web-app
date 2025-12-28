@@ -31,5 +31,4 @@ export const POST = apiHandler(async (request) => {
         message: "User created successfully",
         data: newUser,
     });
-    return NextResponse.json({ message: "User registered successfully" }, { status: 200 })
 })
