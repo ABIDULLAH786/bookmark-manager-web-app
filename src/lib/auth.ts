@@ -40,8 +40,9 @@ export const authOptions: NextAuthOptions = {
                 return {
                     id: user._id.toString(),
                     email: user.email,
-                    name: user?.name, // optional
-                    image: user?.image, // optional
+                    username: user?.email.split("@")[0], 
+                    name: user?.name, 
+                    image: user?.image, 
                 };
             },
         }),
@@ -68,7 +69,7 @@ export const authOptions: NextAuthOptions = {
                 const existingUser = await User.findOne({ email: user.email });
                 if (!existingUser) {
                     await User.create({
-                        name: user.name,
+                        username: user.name,
                         email: user.email,
                         image: user.image,
                         provider: account.provider || "google",
