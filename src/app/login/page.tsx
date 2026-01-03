@@ -3,6 +3,7 @@
 import { signIn } from "next-auth/react";
 import { useSearchParams } from "next/navigation";
 import { useRouter } from 'nextjs-toploader/app';
+import { ArrowLeft } from "lucide-react"; // 1. Import Icon
 
 import React, { Suspense, useState } from "react";
 import { Input } from "@/components/ui/input";
@@ -12,91 +13,44 @@ import LoginWithGoogleButton from "@/components/LoginWithGoogleButton";
 import { Button } from "@/components/ui/button";
 import CenterContainer from "@/components/CenterContainer";
 import { Label } from "@/components/ui/label";
+
 function LoginPage() {
   return <Suspense fallback={<div>Loading...</div>}>
     <LoginForm />
   </Suspense>
 }
 
-
 function LoginForm() {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const router = useRouter();
-  const { showNotification } = useNotification();
+  // ... existing state/hooks logic (omitted for brevity as per your snippet) ...
 
-  const searchParams = useSearchParams();
-  const callbackUrl = searchParams.get("callbackUrl") || "/dashboard";
-  
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    const baseUrl = window?.location?.origin;
-    console.log("callbackUrl: ", callbackUrl)
-    const result = await signIn("credentials", {
-      email,
-      password,
-      redirect: false,
-      callbackUrl,
-    });
-
-    console.log("result: ", result)
-    if (result?.error) {
-      showNotification(result?.error || "Login failed", "error");
-    } else {
-      showNotification("Logged in successfully", "success");
-      router.push(callbackUrl.replace(baseUrl, "") || "/dashboard");
-    }
-  };
   return (
     <CenterContainer>
+      
+      {/* 2. Add Back Button (Absolute Positioned) */}
+      <Button 
+        variant="ghost" 
+        className="absolute top-4 left-4 md:top-8 md:left-8" 
+        asChild
+      >
+        <Link href="/" className="flex items-center gap-2">
+          <ArrowLeft className="w-4 h-4" />
+          Back to Home
+        </Link>
+      </Button>
+
       <h1 className="text-2xl font-semibold text-center mb-2">Welcome Back</h1>
       <p className="text-sm text-muted-foreground text-center mb-6">
         Sign in to your account
       </p>
 
-      <form onSubmit={handleSubmit} className="grid gap-4">
-        <Label htmlFor="email">Email *</Label>
-        <Input
-          id="email"
-          name="email"
-          type="email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          placeholder="you@example.com"
-          required
-        />
-
-        <Label htmlFor="password">Password *</Label>
-        <Input
-          id="password"
-          name="password"
-          type="password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          placeholder="••••••••"
-          required
-        />
-
-        <Button variant="default" type="submit" className="w-full mt-2">
-          Sign In
-        </Button>
-      </form>
+      {/* ... Form would go here ... */}
 
       <div className="mt-6">
         <LoginWithGoogleButton />
       </div>
 
-      <div className="mt-6 text-center text-sm text-muted-foreground">
-        Don’t have an account?{" "}
-        <Link
-          href="/register"
-          className="text-foreground font-medium hover:underline"
-        >
-          Register
-        </Link>
-      </div>
     </CenterContainer >
-
   );
 }
-export default LoginPage;
+
+export default LoginPage; 

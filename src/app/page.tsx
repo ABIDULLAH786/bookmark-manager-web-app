@@ -10,6 +10,8 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import HeaderAuth from "@/components/PageComponents/landing/HeaderAuth";
 
+const GET_START_URL = "/login";
+
 export default async function LandingPage() {
 const session = await getServerSession(authOptions);
   return (
@@ -32,9 +34,9 @@ const session = await getServerSession(authOptions);
               <span className="text-lg sm:text-xl tracking-tight font-medium cursor-pointer">{BRAND_NAME}</span>
             </div>
             <div className="flex items-center gap-2 sm:gap-4">
-              <div className="hidden sm:flex">
+              {/* <div className="hidden sm:flex"> */}
 
-              <Button variant="ghost" size="icon" className="rounded-full" asChild>
+             {!session&& <Button variant="ghost" size="icon" className="rounded-full" asChild>
                 <Link
                   href={GITHUB_URL}
                   target="_blank"
@@ -43,8 +45,8 @@ const session = await getServerSession(authOptions);
                   <Github className="w-5 h-5" />
                   <span className="sr-only">GitHub</span>
                 </Link>
-              </Button>
-              </div>
+              </Button>}
+              {/* </div> */}
 
               <ThemeToggle />
               <HeaderAuth session={session} />
@@ -78,7 +80,7 @@ const session = await getServerSession(authOptions);
                 size="lg"
                 className="w-full sm:w-auto h-11 sm:h-12 px-6 sm:px-8 text-sm sm:text-base group"
               >
-                <Link href="/register" className="flex items-center">
+                <Link href={GET_START_URL} className="flex items-center">
                   Get Started
                   <ArrowRight className="ml-2 w-4 h-4 group-hover:translate-x-1 transition-transform" />
                 </Link>
@@ -221,7 +223,7 @@ const session = await getServerSession(authOptions);
                 size="lg"
                 className="h-11 sm:h-12 px-6 sm:px-8 text-sm sm:text-base group"
               >
-                <Link href="/register" className="flex items-center">
+                <Link href={GET_START_URL} className="flex items-center">
                   Start Using Now
                   <ArrowRight className="ml-2 w-4 h-4 group-hover:translate-x-1 transition-transform" />
                 </Link>
