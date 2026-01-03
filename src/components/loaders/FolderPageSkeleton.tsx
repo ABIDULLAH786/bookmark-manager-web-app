@@ -7,8 +7,8 @@ export const PageMainAreaSkeleton = () => {
         <div className="px-6 py-8">
            
            {/* 1. Header Skeleton */}
-           <div className="md:flex flex-row items-center justify-between border-none mb-6">
-              <div className="space-y-3 w-full max-w-lg">
+           <div className="flex flex-col sm:flex-row md:items-center justify-between border-none gap-3 sm:gap-10">
+              <div className="flex flex-col   gap-1 md:gap-3 shrink-0">
                  {/* Title */}
                  <div className="h-8 w-48 bg-slate-200 dark:bg-slate-800 rounded-md" />
                  {/* Description */}
@@ -16,10 +16,11 @@ export const PageMainAreaSkeleton = () => {
               </div>
               
               {/* Action Buttons */}
-              <div className="flex gap-3 mt-4 md:mt-0">
-                 <div className="h-10 w-32 rounded-md bg-slate-200 dark:bg-slate-800 border border-dashed border-slate-300 dark:border-slate-700" />
-                 <div className="h-10 w-36 rounded-md bg-slate-200 dark:bg-slate-800 border border-dashed border-slate-300 dark:border-slate-700" />
+               <div className="flex gap-3 mt-4 md:mt-0">
+                 <div className="h-10 w-full md:w-32 rounded-md bg-slate-200 dark:bg-slate-800 border border-dashed border-slate-300 dark:border-slate-700" />
+                 <div className="h-10 w-full md:w-36 rounded-md bg-slate-200 dark:bg-slate-800 border border-dashed border-slate-300 dark:border-slate-700" />
               </div>
+             
            </div>
            
            <Separator className="mt-4 mb-8" />

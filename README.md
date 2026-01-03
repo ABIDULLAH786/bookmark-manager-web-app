@@ -13,6 +13,58 @@ pnpm dev
 # or
 bun dev
 ```
+<!-- DOAMINS:
+Markd.io
+    Qeep.it 
+    LinkBin.io
+    SecondBrain.dev
+    ClipIt.so
+    MarkThis.dev
+    SaveIt.cc
+    SnapUrl.io
+    KeepTabs.app
+
+
+    Note: Since .com names are hard to get, looking for .io, .app, or .dev domains usually gives you better names that are actually available.
+
+
+    => Here are 20+ new suggestions categorized by the specific "vibe" of your favorites:
+
+    1. The "Quick Capture" Vibe
+        Similar to: ClipIt, SnapUrl, MarkThis Focus: Fast, efficient, immediate.
+        SnipLink.io (Sharp, precise)
+        GrabIt.dev (Action-oriented)
+        PinWeb.so (Classic "pinning" metaphor)
+        TagUrl.app (Simple and organized)
+        PickLink.io
+        CutPaste.dev (A nod to developer habits)
+
+    2. The "Storage Container" Vibe
+    Similar to: LinkBin, SaveIt, Qeep Focus: A dedicated place to dump/store things.
+        LinkBucket.io (Casual, easy to "toss" things into)
+        WebDepot.dev (Feels industrial and reliable)
+        UrlJar.app (Simple, contained)
+        StashBase.io (Developer-friendly term "Stash")
+        https://www.google.com/search?q=StackUrl.com (Refers to the "Tech Stack")
+        CodeCloset.dev (If you want to lean heavily into the dev angle)
+
+    3. The "Smart/Memory" Vibe
+    Similar to: SecondBrain, KeepTabs Focus: Enhancing your mind and organization.
+        BrainBase.app (Alliterative, strong)
+        MindExtend.io (Literal "Second Brain" meaning)
+        Recall.dev (Simple, powerful)
+        Memry.so (Short for Memory, trendy spelling)
+        TabVault.io (Direct alternative to KeepTabs)
+        WebMind.cc
+
+    4. Short & Phonetic (SaaS Style)
+    Similar to: Qeep.it Focus: Unique spelling, brandable.
+        Stord.io (Stored)
+        Lynk.dev (Link)
+        Kapture.app (Capture)
+        SyncIt.so
+        Vult.io (Vault)
+ -->
 
 Open [http://localhost:5588](http://localhost:5588) with your browser to see the result.
 

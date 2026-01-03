@@ -32,7 +32,7 @@ export function Header({ currentFolder }: HeaderProps) {
             <Link href={"/dashboard"} className="flex items-center gap-2">
               <Bookmark className="h-6 w-6 text-primary" />
               <h1 className="text-xl font-semibold">
-                {currentFolder ? currentFolder : 'Bookmark Manager'}
+                {currentFolder ? currentFolder : BRAND_NAME}
               </h1>
             </Link>
           </div>
@@ -52,6 +52,7 @@ import { LogOut, Settings, User } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from './ui/dropdown-menu';
 import { Avatar, AvatarFallback } from './ui/avatar';
 import { signOut } from 'next-auth/react';
+import { BRAND_NAME } from '@/constants';
 
 export default function UserDropDown() {
   const { data: session } = useSession();
@@ -65,8 +66,8 @@ export default function UserDropDown() {
       </DropdownMenuTrigger>
       <DropdownMenuContent className='bg-surface'>
         <DropdownMenuLabel className='text-muted-foreground'>
-          <span > User:</span>
-           <span> {session?.user?.name ?? session?.user?.email?.split("@")[0]}</span>
+          <span> User:</span>
+          <span> {session?.user?.name ?? session?.user?.email?.split("@")[0]}</span>
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
         <DropdownMenuItem className='cursor-pointer'>
