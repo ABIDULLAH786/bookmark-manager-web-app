@@ -23,7 +23,7 @@ export default function HeaderAuth({ session }: { session: any }) {
             </div>
         );
     }
-
+    return null;
     return (
         <Button variant="default" size="sm" asChild>
             <Link href="/login">
