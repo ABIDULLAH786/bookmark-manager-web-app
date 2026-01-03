@@ -59,12 +59,13 @@ export const authOptions: NextAuthOptions = {
     ],
     callbacks: {
         async signIn({ user, account }) {
+                console.log("SIGN_IN user: ", {user, account});
+
             if (account?.provider === "google") {
                 await connectToDatabase();
 
                 // Check if user already exists
                 const existingUser = await User.findOne({ email: user.email });
-
                 if (!existingUser) {
                     await User.create({
                         name: user.name,
@@ -77,10 +78,21 @@ export const authOptions: NextAuthOptions = {
             return true;
         },
 
-        async jwt({ token, user }) {
-            console.log("JWT Callback: ", { token, user })
+       async jwt({ token, user }) {
             if (user) {
-                token._id = user.id;
+                // "user" is present only on the initial sign-in.
+                
+                // Connect to DB to ensure we can find the user
+                await connectToDatabase();
+                
+                // Fetch the user from MongoDB using the email
+                // We do this to get the REAL MongoDB _id, not the Google ID
+                const dbUser = await User.findOne({ email: user.email });
+
+                // Assign the MongoDB _id to the token
+                if (dbUser) {
+                    token._id = dbUser._id.toString();
+                }
             }
             return token;
         },

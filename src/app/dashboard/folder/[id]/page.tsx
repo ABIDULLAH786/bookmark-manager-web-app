@@ -1,4 +1,4 @@
-import FolderPageClient from "@/components/pages-clients/FolderPageClient";
+import FolderPageClient from "@/components/PageComponents/folders/FolderPageClient";
 
 export default async function Page({
   params,

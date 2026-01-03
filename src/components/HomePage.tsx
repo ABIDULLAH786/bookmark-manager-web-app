@@ -28,7 +28,7 @@ export function Homepage({
 
   return (
     <div className="px-4 py-8">
-      <Card className=" flex flex-row justify-between border-none">
+      <Card className=" flex flex-col md:flex-row justify-between border-none">
         <div className=''>
           <h2 className="text-2xl font-semibold mb-2">Your Bookmarks</h2>
           <p className="text-muted-foreground">

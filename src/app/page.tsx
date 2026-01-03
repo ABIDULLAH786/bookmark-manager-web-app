@@ -4,11 +4,14 @@ import { Bookmark, Folder, Search, Moon, Sun, Layers, Zap, Shield, Grid3x3, Arro
 import { Button } from "@/components/ui/button";
 import ThemeToggle from "@/components/ThemeToggle";
 import Link from "next/link";
-import { GITHUB_URL } from "@/constants";
+import { BRAND_NAME, GITHUB_URL } from "@/constants";
+import { getServerSession } from "next-auth";
 
+import { authOptions } from "@/lib/auth";
+import HeaderAuth from "@/components/PageComponents/landing/HeaderAuth";
 
 export default async function LandingPage() {
-
+const session = await getServerSession(authOptions);
   return (
     <div className="min-h-screen bg-background relative overflow-hidden">
       {/* Animated linear background */}
@@ -26,9 +29,11 @@ export default async function LandingPage() {
               <div className="w-8 h-8 sm:w-10 sm:h-10 bg-primary rounded-lg flex items-center justify-center cursor-pointer">
                 <Bookmark className="w-5 h-5 sm:w-6 sm:h-6 text-primary-foreground " />
               </div>
-              <span className="text-lg sm:text-xl tracking-tight font-medium cursor-pointer">Bookmark Manager</span>
+              <span className="text-lg sm:text-xl tracking-tight font-medium cursor-pointer">{BRAND_NAME}</span>
             </div>
             <div className="flex items-center gap-2 sm:gap-4">
+              <div className="hidden sm:flex">
+
               <Button variant="ghost" size="icon" className="rounded-full" asChild>
                 <Link
                   href={GITHUB_URL}
@@ -39,8 +44,11 @@ export default async function LandingPage() {
                   <span className="sr-only">GitHub</span>
                 </Link>
               </Button>
+              </div>
 
               <ThemeToggle />
+              <HeaderAuth session={session} />
+
             </div>
           </div>
         </div>
@@ -231,11 +239,25 @@ export default async function LandingPage() {
               <div className="w-6 h-6 sm:w-8 sm:h-8 bg-primary rounded-lg flex items-center justify-center">
                 <Bookmark className="w-4 h-4 sm:w-5 sm:h-5 text-primary-foreground" />
               </div>
-              <span className="text-sm sm:text-base text-muted-foreground">Bookmark Manager</span>
+              <span className="text-sm sm:text-base text-muted-foreground">{BRAND_NAME}</span>
             </div>
-            <p className="text-xs sm:text-sm text-muted-foreground">
-              Built with Next.js and shadcn/ui
-            </p>
+           <div className="flex flex-row items-center gap-3">
+                {/* 1. Added GitHub Link Here */}
+                
+                <p className="text-xs sm:text-sm text-muted-foreground">
+                  Built with Next.js and shadcn/ui
+                </p>
+
+                <Link 
+                  href={GITHUB_URL} 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="text-xs sm:text-sm text-muted-foreground flex items-center gap-2 hover:text-foreground transition-colors"
+                >
+                    <Github className="w-4 h-4 text-white " />
+                </Link>
+
+            </div>
           </div>
         </div>
       </footer>

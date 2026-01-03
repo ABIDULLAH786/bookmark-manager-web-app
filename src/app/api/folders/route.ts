@@ -62,6 +62,7 @@ export async function GET() {
     );
 
   } catch (err: any) {
+    console.error("Error fetching folders:", err);
     return apiError(500, err.message || "Internal Server error");
   }
 }
