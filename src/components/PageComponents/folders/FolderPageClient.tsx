@@ -36,12 +36,12 @@ export default function FolderPageClient({ id }: FolderPageClientProps) {
     }, [singleFolder])
 
     if (singleFolderError) console.error(singleFolderError)
-    if (singleFolderLoading) return <PageMainAreaSkeleton />
+    if (singleFolderLoading || true) return <PageMainAreaSkeleton />
 
     return (
         <div className="flex h-[calc(100vh-60px)]">
             <div className="flex-1 overflow-y-auto">
-                <div className="px-6 py-8 bg-green-300">
+                <div className="px-6 py-8">
 
                     {/* --- HEADER SECTION START --- */}
                     <Card className='flex flex-col sm:flex-row md:items-center justify-between border-none gap-10'>
@@ -61,7 +61,7 @@ export default function FolderPageClient({ id }: FolderPageClientProps) {
                         </div>
 
                         {/* Right Side: Buttons */}
-                        <div className='flex flex-col  sm:flex-row gap-1 md:gap-3 shrink-0'>
+                        <div className='flex flex-col sm:flex-row gap-1 md:gap-3 shrink-0'>
                             <AddCard type="folder" onClick={() => openAddFolder(id)} />
                             <AddCard type="bookmark" onClick={() => openAddBookmark(id)} />
                         </div>

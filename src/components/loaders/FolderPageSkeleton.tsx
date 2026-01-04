@@ -16,9 +16,9 @@ export const PageMainAreaSkeleton = () => {
               </div>
               
               {/* Action Buttons */}
-               <div className="flex gap-3 mt-4 md:mt-0">
-                 <div className="h-10 w-full md:w-32 rounded-md bg-slate-200 dark:bg-slate-800 border border-dashed border-slate-300 dark:border-slate-700" />
-                 <div className="h-10 w-full md:w-36 rounded-md bg-slate-200 dark:bg-slate-800 border border-dashed border-slate-300 dark:border-slate-700" />
+               <div className="flex flex-col sm:flex-row items-center gap-3 mt-4 md:mt-0">
+                 <div className="h-8 w-full sm:w-32 rounded-md bg-slate-200 dark:bg-slate-800 border border-dashed border-slate-300 dark:border-slate-700" />
+                 <div className="h-8 w-full sm:w-36 rounded-md bg-slate-200 dark:bg-slate-800 border border-dashed border-slate-300 dark:border-slate-700" />
               </div>
              
            </div>
