@@ -13,7 +13,7 @@ export function useBookmarkActions() {
   const pathname = usePathname();
   console.log("pathname: ", pathname)
   const { mutate } = useSWRConfig()
-  
+
   const { showNotification } = useNotification();
   const [loading, setLoading] = useState(false);
 
@@ -32,8 +32,7 @@ export function useBookmarkActions() {
     setLoading(true);
     try {
       const text = await file.text();
-      const parsedData = parseNetscapeHtml(text);
-
+      const { items: parsedData, hasBookmarksBar } = parseNetscapeHtml(text);
       if (parsedData.length === 0) {
         throw new Error("No bookmarks found in file.");
       }
@@ -43,7 +42,7 @@ export function useBookmarkActions() {
       const res = await fetch(apiEndPoint, {
         method: method as HTTP_METHOD,
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ bookmarks: parsedData }),
+        body: JSON.stringify({ bookmarks: parsedData, hasBookmarksBar }),
       });
 
       if (!res.ok) throw new Error("Failed to save bookmarks.");

@@ -11,6 +11,8 @@ export interface IFolderModle {
     subFolders?: Types.ObjectId[];
     bookmarks?: Types.ObjectId[];
 
+    hasBookmarksBar?: boolean;
+
     sharedWith?: Types.ObjectId[];
     isFavoriteBy?: Types.ObjectId[];
 }
@@ -25,6 +27,8 @@ const FolderSchema = new Schema<IFolderModle>(
         sharedWith: [{ type: Schema.Types.ObjectId, ref: "User" }],
         isFavoriteBy: [{ type: Schema.Types.ObjectId, ref: "User" }],
 
+        hasBookmarksBar: { type: Boolean, default: false },
+        
         // ✅ Relations with folder itself and bookmarks
         subFolders: [{ type: Schema.Types.ObjectId, ref: "Folder" }],
         bookmarks: [{ type: Schema.Types.ObjectId, ref: "Bookmark" }],

@@ -12,7 +12,7 @@ import { fetcher } from '@/helper/fetcher';
 import { IError } from '@/types/error';
 import { cn } from "@/lib/utils";
 import { MAX_DESC_LENGTH, MAX_TITLE_LENGTH } from '@/constants';
-import { Upload, X } from 'lucide-react'; // Import icons
+import { Upload, X } from 'lucide-react';
 import { API_PATHS } from '@/lib/apiPaths';
 import { HTTP_METHOD } from 'next/dist/server/web/http';
 
@@ -34,8 +34,8 @@ export function AddBookmarkModal({ open, onClose, parentFolderId }: AddBookmarkM
   const [description, setDescription] = useState('');
 
   // Icon States
-  const [icon, setIcon] = useState<string>(''); // Stores the Base64 string
-  const [preview, setPreview] = useState<string>(''); // Stores the visual preview URL
+  const [icon, setIcon] = useState<string>(''); // Stores the Base64 string from upload
+  const [preview, setPreview] = useState<string>(''); // Stores the visual preview URL (Google S2)
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [loading, setLoading] = useState(false);
@@ -44,18 +44,13 @@ export function AddBookmarkModal({ open, onClose, parentFolderId }: AddBookmarkM
   const isTitleInvalid = title.length > MAX_TITLE_LENGTH;
   const isDescInvalid = description.length > MAX_DESC_LENGTH;
 
-  // 1. Auto-generate default preview when URL changes (if no custom icon selected)
+  // 1. Auto-generate default preview when URL changes
   useEffect(() => {
-    if (!url || icon) return; // Don't override if user uploaded a custom icon
+    if (!url || icon) return;
 
-    // Simple regex to check if URL is valid-ish before trying to fetch icon
     const isValidUrl = url.match(/^(https?:\/\/)?([\da-z\.-]+)\.([a-z\.]{2,6})([\/\w \.-]*)*\/?$/);
 
     if (isValidUrl) {
-      // Use Google's S2 service for a visual default preview
-      // Note: We can't easily convert this to Base64 on client due to CORS, 
-      // so this is just for the user to "see" a default.
-      // If you want the backend to store this specific image, the backend should fetch it.
       const domain = url.replace(/^(https?:\/\/)?(www\.)?/, '').split('/')[0];
       setPreview(`https://www.google.com/s2/favicons?domain=${domain}&sz=64`);
     } else {
@@ -63,21 +58,19 @@ export function AddBookmarkModal({ open, onClose, parentFolderId }: AddBookmarkM
     }
   }, [url, icon]);
 
-  // 2. Handle File Selection (Convert to Base64)
+  // 2. Handle File Selection (Custom Upload)
   const handleIconChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      // Check file size (e.g., limit to 100KB to prevent huge DB payloads)
       if (file.size > 100 * 1024) {
         setErrorMsg("Icon size too large. Max 100KB.");
         return;
       }
-
       const reader = new FileReader();
       reader.onloadend = () => {
         const base64String = reader.result as string;
-        setIcon(base64String); // Store payload
-        setPreview(base64String); // Update UI
+        setIcon(base64String); 
+        setPreview(base64String); 
       };
       reader.readAsDataURL(file);
     }
@@ -87,6 +80,24 @@ export function AddBookmarkModal({ open, onClose, parentFolderId }: AddBookmarkM
     setIcon('');
     setPreview('');
     if (fileInputRef.current) fileInputRef.current.value = '';
+  };
+
+  // 3. Helper: Convert URL to Base64
+  const convertUrlToBase64 = async (imageUrl: string): Promise<string | null> => {
+    try {
+      // Attempt to fetch the image
+      const response = await fetch(imageUrl);
+      const blob = await response.blob();
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onloadend = () => resolve(reader.result as string);
+        reader.onerror = reject;
+        reader.readAsDataURL(blob);
+      });
+    } catch (error) {
+      console.warn("CORS prevented Base64 conversion, falling back to URL.", error);
+      return null;
+    }
   };
 
   const handleCreateBookmark = async (e: React.FormEvent) => {
@@ -103,6 +114,23 @@ export function AddBookmarkModal({ open, onClose, parentFolderId }: AddBookmarkM
     setLoading(true);
     setErrorMsg(null);
 
+    // 4. Determine Final Icon
+    let finalIcon = icon; 
+    
+    // If no custom uploaded icon, try to use the preview
+    if (!finalIcon && preview) {
+        // Try converting preview URL to Base64
+        const base64Preview = await convertUrlToBase64(preview);
+        
+        if (base64Preview) {
+             finalIcon = base64Preview;
+        } else {
+             // Fallback: If conversion fails (usually due to CORS on Google's side),
+             // just send the URL string. The frontend Card component handles both.
+             finalIcon = preview;
+        }
+    }
+
     try {
       const { url: apiEndPoint, method } = API_PATHS.BOOKMARKS.CREATE();
 
@@ -117,8 +145,7 @@ export function AddBookmarkModal({ open, onClose, parentFolderId }: AddBookmarkM
             parentFolder: parentFolderId,
             createdAt: new Date(),
             createdBy: (session.user as any).id,
-            // 3. Send the Base64 icon if it exists
-            icon: icon || undefined
+            icon: finalIcon // Send the converted Base64 or the URL
           },
         },
       ]);

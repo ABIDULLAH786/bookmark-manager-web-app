@@ -39,7 +39,7 @@ interface BookmarkDropDownProps {
 export function BookmarkDropDown({ bookmark }: BookmarkDropDownProps) {
   const router = useRouter()
   const params = useParams()
-  
+
   // Local UI State
   const [showUpdateDialog, setShowUpdateDialog] = useState(false)
   const [showDeleteDialog, setShowDeleteDialog] = useState(false)
@@ -47,20 +47,22 @@ export function BookmarkDropDown({ bookmark }: BookmarkDropDownProps) {
   const [isLoading, setIsLoading] = useState(false)
 
   // Global Store Actions
-  const { 
+  const {
     // single folder state handle for bookmark
     singleSelectedFolder,
     updateBookmarkInSelected,
     removeBookmarkFromSelected,
+
   } = useFolderStore()
-  const {updateBookmark} = useBookmarkStore()
+  const { removeBookmark } = useBookmarkStore()
+  const { updateBookmark } = useBookmarkStore()
 
   // --- 1. Handle Update (PATCH) ---
   const handleUpdateFolder = async () => {
     setIsLoading(true);
     try {
       const apiInfo = API_PATHS.BOOKMARKS.PATCH(bookmark._id!);
-      
+
       const res = await fetch(apiInfo.url, {
         method: apiInfo.method,
         headers: { "Content-Type": "application/json" },
@@ -74,9 +76,9 @@ export function BookmarkDropDown({ bookmark }: BookmarkDropDownProps) {
       if (!res.ok) throw new Error("Failed to update");
       const { data: updatedBookmark } = await res.json();
       console.log("updatedBookmark: ", updatedBookmark)
-      if(bookmark?.parentFolder){
+      if (bookmark?.parentFolder) {
         updateBookmarkInSelected(updatedBookmark);
-      }else{
+      } else {
         updateBookmark(updatedBookmark)
       }
       setShowUpdateDialog(false);
@@ -93,15 +95,20 @@ export function BookmarkDropDown({ bookmark }: BookmarkDropDownProps) {
     setIsLoading(true);
     try {
       const apiInfo = API_PATHS.BOOKMARKS.DELETE(bookmark._id!);
-      
+
       const res = await fetch(apiInfo.url, {
         method: apiInfo.method,
       });
 
       if (!res.ok) throw new Error("Failed to delete bookmark");
 
-      // A. Remove bookmark from sekected folder
-      removeBookmarkFromSelected(bookmark._id!);
+      if (bookmark.parentFolder) {
+        // A. Remove bookmark from selected folder
+        removeBookmarkFromSelected(bookmark._id!);
+      } else {
+        // B. Remove bookmark from root directory
+        removeBookmark(bookmark._id!);
+      }
 
 
       setShowDeleteDialog(false);
@@ -128,7 +135,7 @@ export function BookmarkDropDown({ bookmark }: BookmarkDropDownProps) {
             <DropdownMenuItem onSelect={() => setShowUpdateDialog(true)} className="cursor-pointer">
               Edit
             </DropdownMenuItem>
-            <DropdownMenuItem 
+            <DropdownMenuItem
               onSelect={() => setShowDeleteDialog(true)}
               className="text-red-600 focus:text-red-600 dark:focus:bg-red-800/10 cursor-pointer"
             >
@@ -201,9 +208,9 @@ export function BookmarkDropDown({ bookmark }: BookmarkDropDownProps) {
             <Button variant="outline" onClick={() => setShowDeleteDialog(false)} disabled={isLoading}>
               Cancel
             </Button>
-            <Button 
-              variant="destructive" 
-              onClick={handleDeleteFolder} 
+            <Button
+              variant="destructive"
+              onClick={handleDeleteFolder}
               disabled={isLoading}
             >
               {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}

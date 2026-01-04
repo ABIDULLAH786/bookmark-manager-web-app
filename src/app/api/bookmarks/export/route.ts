@@ -18,8 +18,6 @@ export async function GET() {
 
     const userId = (session.user as any).id;
 
-    // 👇 FIX: Ensure both queries use 'createdBy' 
-    // (Previously bookmarks might have been using 'userId')
     const [folders, bookmarks] = await Promise.all([
       folderModel.find({ createdBy: userId }).lean(),
       bookmarkModel.find({ createdBy: userId }).lean(), 
