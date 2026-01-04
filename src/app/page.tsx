@@ -117,7 +117,7 @@ const session = await getServerSession(authOptions);
                     {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
                       <div
                         key={i}
-                        className="aspect-[4/3] rounded-lg border border-border bg-card/60 backdrop-blur-sm p-3 sm:p-4 hover:bg-accent/50 transition-colors cursor-pointer group"
+                        className="aspect-4/3 rounded-lg border border-border bg-card/60 backdrop-blur-sm p-3 sm:p-4 hover:bg-accent/50 transition-colors cursor-pointer group"
                       >
                         <div className="flex items-center gap-2 mb-2">
                           <div className="w-6 h-6 sm:w-8 sm:h-8 rounded-md bg-primary/10 flex items-center justify-center">

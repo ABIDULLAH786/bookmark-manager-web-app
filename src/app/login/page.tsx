@@ -9,7 +9,7 @@ import React, { Suspense, useState } from "react";
 import { Input } from "@/components/ui/input";
 import { useNotification } from "@/components/Notification";
 import Link from "next/link";
-import LoginWithGoogleButton from "@/components/LoginWithGoogleButton";
+import LoginWithGoogleButton from "@/components/buttons/LoginWithGoogleButton";
 import { Button } from "@/components/ui/button";
 import CenterContainer from "@/components/CenterContainer";
 import { Label } from "@/components/ui/label";

@@ -65,7 +65,7 @@ const FolderItem = ({
     if (hasChildren) {
       setIsOpen(true);
     }
-    if(isSelected){
+    if (isSelected) {
       setIsOpen(!isOpen);
     }
     onSelect(folder._id);
@@ -74,8 +74,8 @@ const FolderItem = ({
 
   const handleToggleClick = (e: React.MouseEvent) => {
     e.stopPropagation();
-      setIsOpen(!isOpen);
-    
+    setIsOpen(!isOpen);
+
   };
 
   return (
@@ -89,7 +89,7 @@ const FolderItem = ({
             : 'text-foreground hover:bg-slate-100 hover:text-foreground/80 dark:hover:bg-slate-700/80'}
         `}
         style={{ paddingLeft }}
-        onClick={handleSelect} 
+        onClick={handleSelect}
       >
         <span
           className={`
@@ -97,12 +97,12 @@ const FolderItem = ({
               transition-colors z-10
             ${hasChildren ? 'visible' : 'invisible'}
           `}
-          onClick={handleToggleClick} 
+          onClick={handleToggleClick}
         >
           {isOpen ? (
-            <ChevronDown size={14} className={cn(isSelected?"text-slate-900 ":"text-slate-900 dark:text-slate-100 ")} />
+            <ChevronDown size={14} className={cn(isSelected ? "text-slate-900 " : "text-slate-900 dark:text-slate-100 ")} />
           ) : (
-            <ChevronRight size={14} className={cn(isSelected?"text-slate-900 ":"text-slate-900 dark:text-slate-100 ")}  />
+            <ChevronRight size={14} className={cn(isSelected ? "text-slate-900 " : "text-slate-900 dark:text-slate-100 ")} />
           )}
         </span>
 
@@ -196,6 +196,10 @@ export default function FolderTree() {
           ))}
         </div>
       </nav>
+      {/* <div className='w-full flex flex-col justify-center gap-3 bottom-0'>
+        <ImportButton />
+        <ExportButton />
+      </div> */}
     </div>
   );
 }
