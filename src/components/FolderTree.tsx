@@ -167,7 +167,7 @@ export default function FolderTree() {
         <div
           onClick={() => {
             setActiveFolderId("all");
-            router.push('/dashboard/folder');
+            router.push('/dashboard');
           }}
           className={`
             flex items-center px-3 py-2 text-sm font-medium rounded-md cursor-pointer

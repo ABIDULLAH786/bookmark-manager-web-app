@@ -20,7 +20,7 @@ export function useBookmarkActions() {
   // --- EXPORT LOGIC ---
   const handleExport = () => {
     // Trigger the browser download directly: /api/bookmarks/export
-    const { url } = API_PATHS.BOOKMARKS.NESTED("/import").CREATE();
+    const { url } = API_PATHS.BOOKMARKS.NESTED("/export").CREATE();
     window.location.href = url;
     showNotification("Export started...", "success");
   };

@@ -81,21 +81,21 @@ export function generateNetscapeHTML(nodes: TreeNode[]): string {
     return output;
   };
 
-  // 3. BOOKMARKS BAR WRAPPER
-  // We explicitly create the "Bookmarks bar" structure here.
-  // All your root folders (including "Imported", "Sports", etc.) will sit INSIDE this bar.
-  
+  // 3. WRAPPER LOGIC: Wrap user root items inside "Bookmarks bar"
   const now = Math.floor(Date.now() / 1000);
   
+  // Start wrapper
   html += `    <DT><H3 ADD_DATE="${now}" LAST_MODIFIED="${now}" PERSONAL_TOOLBAR_FOLDER="true">Bookmarks bar</H3>\n`;
   html += `    <DL><p>\n`;
 
-  // Inject user content (This includes your "Imported" folder if it exists in DB)
+  // Inject user content inside
   html += buildHtmlRecursive(nodes, "        ");
 
-  html += `    </DL><p>\n`; // End Bookmarks bar DL
+  // Close wrapper
+  html += `    </DL><p>\n`;
   
-  html += "</DL><p>"; // End Main DL
+  // Close main file
+  html += "</DL><p>";
   
   return html;
 }

@@ -18,20 +18,16 @@ export async function GET() {
 
     const userId = (session.user as any).id;
 
-    // 1. Fetch EVERYTHING for this user (Efficient: Only 2 Queries)
-    // .lean() is important for performance with large datasets
+    // 👇 FIX: Ensure both queries use 'createdBy' 
+    // (Previously bookmarks might have been using 'userId')
     const [folders, bookmarks] = await Promise.all([
       folderModel.find({ createdBy: userId }).lean(),
-      bookmarkModel.find({ userId: userId }).lean(), // Assuming your schema uses 'userId' or 'createdBy'
+      bookmarkModel.find({ createdBy: userId }).lean(), 
     ]);
 
-    // 2. Reconstruct the Tree
     const tree = buildBookmarkTree(folders, bookmarks);
-
-    // 3. Generate HTML String
     const htmlContent = generateNetscapeHTML(tree);
 
-    // 4. Return as Downloadable File
     return new NextResponse(htmlContent, {
       status: 200,
       headers: {
