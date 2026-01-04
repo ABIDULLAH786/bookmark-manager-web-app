@@ -1,9 +1,8 @@
-import React from 'react';
-import { ArrowLeft, Bookmark } from 'lucide-react';
+import React, { useRef } from 'react';
+import { ArrowLeft, Bookmark, Download, Loader2, Upload } from 'lucide-react';
 import { Button } from './ui/button';
 import ThemeToggle from './ThemeToggle';
 import { usePathname } from 'next/navigation';
-import { useRouter } from 'nextjs-toploader/app';
 
 import Link from 'next/link';
 import { SidebarTrigger } from './ui/sidebar';
@@ -53,33 +52,64 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel,
 import { Avatar, AvatarFallback } from './ui/avatar';
 import { signOut } from 'next-auth/react';
 import { BRAND_NAME } from '@/constants';
+import { useBookmarkActions } from '@/hooks/useBookmarkActions';
 
 export default function UserDropDown() {
   const { data: session } = useSession();
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const { handleExport, handleImport, loading } = useBookmarkActions();
 
+  // Helper to trigger the hidden input
+  const triggerFileInput = (e: Event) => {
+    e.preventDefault();
+    fileInputRef.current?.click();
+  };
   return (
-    <DropdownMenu>
-      <DropdownMenuTrigger className="cursor-pointer focus:outline-hidden focus:ring-2 focus:ring-offset focus:ring-primary rounded-full">
-        <Avatar>
-          <AvatarFallback>A</AvatarFallback>
-        </Avatar>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent className='bg-surface'>
-        <DropdownMenuLabel className='text-muted-foreground'>
-          <span> User:</span>
-          <span> {session?.user?.name ?? session?.user?.email?.split("@")[0]}</span>
-        </DropdownMenuLabel>
-        <DropdownMenuSeparator />
-        <DropdownMenuItem className='cursor-pointer'>
-          <User className="h-4 w-4" /> Profile
-        </DropdownMenuItem>
-        <DropdownMenuItem className='cursor-pointer'>
-          <Settings className="h-4 w-4" /> Settings
-        </DropdownMenuItem>
-        <DropdownMenuItem className="text-destructive cursor-pointer" onClick={() => signOut({ callbackUrl: "/login" })}>
-          <LogOut className="h-4 w-4" /> Logout
-        </DropdownMenuItem>
-      </DropdownMenuContent>
-    </DropdownMenu>
+    <>
+      {/* Hidden Input for Import */}
+      <input
+        type="file"
+        ref={fileInputRef}
+        onChange={handleImport}
+        className="hidden"
+        accept=".html"
+      />
+      <DropdownMenu>
+        <DropdownMenuTrigger className="cursor-pointer focus:outline-hidden focus:ring-2 focus:ring-offset focus:ring-primary rounded-full">
+          <Avatar>
+            <AvatarFallback>A</AvatarFallback>
+          </Avatar>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent className='bg-surface'>
+          <DropdownMenuLabel className='text-muted-foreground'>
+            <span> User:</span>
+            <span> {session?.user?.name ?? session?.user?.email?.split("@")[0]}</span>
+          </DropdownMenuLabel>
+          <DropdownMenuSeparator />
+          <DropdownMenuItem className='cursor-pointer' onClick={handleExport}>
+            <Download className="h-4 w-4" /> Export Bookmarks
+          </DropdownMenuItem>
+
+          <DropdownMenuItem
+            className='cursor-pointer'
+            onSelect={triggerFileInput} // Use onSelect for Dropdown items to prevent closing early if needed
+            disabled={loading}
+          >
+            {loading ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+              <Upload className="h-4 w-4" />
+            )}
+            <span>{loading ? "Importing..." : "Import Bookmarks"}</span>
+          </DropdownMenuItem>
+          <DropdownMenuItem className="text-destructive cursor-pointer" onClick={() => signOut({ callbackUrl: "/login" })}>
+            <LogOut className="h-4 w-4" /> Logout
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
+    </>
+
   );
 }
+
+

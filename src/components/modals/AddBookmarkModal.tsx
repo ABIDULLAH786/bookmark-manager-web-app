@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Textarea } from '../ui/textarea';
 import { Input } from '../ui/input';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '../ui/dialog';
@@ -10,8 +10,11 @@ import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { fetcher } from '@/helper/fetcher';
 import { IError } from '@/types/error';
-import { cn } from "@/lib/utils"; // Import utility for class merging
+import { cn } from "@/lib/utils";
 import { MAX_DESC_LENGTH, MAX_TITLE_LENGTH } from '@/constants';
+import { Upload, X } from 'lucide-react';
+import { API_PATHS } from '@/lib/apiPaths';
+import { HTTP_METHOD } from 'next/dist/server/web/http';
 
 interface AddBookmarkModalProps {
   open: boolean;
@@ -22,67 +25,139 @@ interface AddBookmarkModalProps {
 export function AddBookmarkModal({ open, onClose, parentFolderId }: AddBookmarkModalProps) {
   const { data: session, status } = useSession();
   const router = useRouter();
-  
+
   const { addBookmark } = useBookmarkStore();
   const { addBookmarkToSelected } = useFolderStore();
-  
+
   const [title, setTitle] = useState('');
   const [url, setUrl] = useState('');
   const [description, setDescription] = useState('');
+
+  // Icon States
+  const [icon, setIcon] = useState<string>(''); // Stores the Base64 string from upload
+  const [preview, setPreview] = useState<string>(''); // Stores the visual preview URL (Google S2)
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
   const isTitleInvalid = title.length > MAX_TITLE_LENGTH;
   const isDescInvalid = description.length > MAX_DESC_LENGTH;
 
+  // 1. Auto-generate default preview when URL changes
+  useEffect(() => {
+    if (!url || icon) return;
+
+    const isValidUrl = url.match(/^(https?:\/\/)?([\da-z\.-]+)\.([a-z\.]{2,6})([\/\w \.-]*)*\/?$/);
+
+    if (isValidUrl) {
+      const domain = url.replace(/^(https?:\/\/)?(www\.)?/, '').split('/')[0];
+      setPreview(`https://www.google.com/s2/favicons?domain=${domain}&sz=64`);
+    } else {
+      setPreview('');
+    }
+  }, [url, icon]);
+
+  // 2. Handle File Selection (Custom Upload)
+  const handleIconChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      if (file.size > 100 * 1024) {
+        setErrorMsg("Icon size too large. Max 100KB.");
+        return;
+      }
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        const base64String = reader.result as string;
+        setIcon(base64String); 
+        setPreview(base64String); 
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleRemoveIcon = () => {
+    setIcon('');
+    setPreview('');
+    if (fileInputRef.current) fileInputRef.current.value = '';
+  };
+
+  // 3. Helper: Convert URL to Base64
+  const convertUrlToBase64 = async (imageUrl: string): Promise<string | null> => {
+    try {
+      // Attempt to fetch the image
+      const response = await fetch(imageUrl);
+      const blob = await response.blob();
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onloadend = () => resolve(reader.result as string);
+        reader.onerror = reject;
+        reader.readAsDataURL(blob);
+      });
+    } catch (error) {
+      console.warn("CORS prevented Base64 conversion, falling back to URL.", error);
+      return null;
+    }
+  };
+
   const handleCreateBookmark = async (e: React.FormEvent) => {
     e.preventDefault();
-     
-    // Security Check
+
     if (status === "unauthenticated" || !session?.user) {
-        onClose(); 
-        return router.push("/login");
+      onClose();
+      return router.push("/login");
     }
 
-    // Validation Check on Submit
-    if (isTitleInvalid) {
-        setErrorMsg(`Title cannot exceed ${MAX_TITLE_LENGTH} characters.`);
-        return;
-    }
-    if (isDescInvalid) {
-        setErrorMsg(`Description cannot exceed ${MAX_DESC_LENGTH} characters.`);
-        return;
-    }
-
+    if (isTitleInvalid || isDescInvalid) return;
     if (!title.trim() || !url.trim()) return;
-    
+
     setLoading(true);
     setErrorMsg(null);
 
+    // 4. Determine Final Icon
+    let finalIcon = icon; 
+    
+    // If no custom uploaded icon, try to use the preview
+    if (!finalIcon && preview) {
+        // Try converting preview URL to Base64
+        const base64Preview = await convertUrlToBase64(preview);
+        
+        if (base64Preview) {
+             finalIcon = base64Preview;
+        } else {
+             // Fallback: If conversion fails (usually due to CORS on Google's side),
+             // just send the URL string. The frontend Card component handles both.
+             finalIcon = preview;
+        }
+    }
+
     try {
+      const { url: apiEndPoint, method } = API_PATHS.BOOKMARKS.CREATE();
+
       const data = await fetcher([
-        "/api/bookmarks",
+        apiEndPoint,
         {
-          method: "POST",
+          method: method as HTTP_METHOD,
           body: {
             title,
             url,
             description,
             parentFolder: parentFolderId,
             createdAt: new Date(),
-            createdBy: (session.user as any).id 
+            createdBy: (session.user as any).id,
+            icon: finalIcon // Send the converted Base64 or the URL
           },
         },
       ]);
-      
+
       console.log("Bookmark added: ", data);
 
-      if(parentFolderId) {
+      if (parentFolderId) {
         addBookmarkToSelected(data);
       } else {
         addBookmark(data);
       }
-      
+
       handleClose();
 
     } catch (err: IError | any) {
@@ -97,6 +172,8 @@ export function AddBookmarkModal({ open, onClose, parentFolderId }: AddBookmarkM
     setTitle('');
     setUrl('');
     setDescription('');
+    setIcon('');
+    setPreview('');
     setErrorMsg(null);
     onClose();
   };
@@ -107,34 +184,31 @@ export function AddBookmarkModal({ open, onClose, parentFolderId }: AddBookmarkM
         <DialogHeader>
           <DialogTitle>Add New Bookmark</DialogTitle>
         </DialogHeader>
-        
-        {/* Fixed the typo in className here */}
+
         <form onSubmit={handleCreateBookmark} className="space-y-4">
-          
-          {/* --- TITLE INPUT --- */}
+
+          {/* --- TITLE --- */}
           <div className="space-y-2">
             <div className="flex justify-between items-center">
-                <Label htmlFor="bookmark-title">Title *</Label>
-                <span className={cn("text-xs", isTitleInvalid ? "text-red-500 font-bold" : "text-muted-foreground")}>
-                    {title.length}/{MAX_TITLE_LENGTH}
-                </span>
+              <Label htmlFor="bookmark-title">Title *</Label>
+              <span className={cn("text-xs", isTitleInvalid ? "text-red-500 font-bold" : "text-muted-foreground")}>
+                {title.length}/{MAX_TITLE_LENGTH}
+              </span>
             </div>
             <Input
               id="bookmark-title"
               value={title}
               onChange={(e) => {
-                  setTitle(e.target.value);
-                  if (errorMsg) setErrorMsg(null);
+                setTitle(e.target.value);
+                if (errorMsg) setErrorMsg(null);
               }}
               placeholder="Enter bookmark title"
               required
-              className={cn(
-                  isTitleInvalid && "border-red-500 focus-visible:ring-red-500"
-              )}
+              className={cn(isTitleInvalid && "border-red-500 focus-visible:ring-red-500")}
             />
           </div>
 
-          {/* --- URL INPUT --- */}
+          {/* --- URL --- */}
           <div className="space-y-2">
             <Label htmlFor="bookmark-url">URL *</Label>
             <Input
@@ -147,26 +221,72 @@ export function AddBookmarkModal({ open, onClose, parentFolderId }: AddBookmarkM
             />
           </div>
 
-          {/* --- DESCRIPTION INPUT --- */}
+          {/* --- ICON SELECTION --- */}
+          <div className="space-y-2">
+            <Label>Icon (Optional)</Label>
+            <div className="flex items-center gap-4">
+              {/* Preview Box */}
+              <div className="max-w-12 max-h-12 rounded-lg bg-transparent flex items-center justify-center overflow-hidden shrink-0 relative group">
+                {preview ? (
+                  <img src={preview} alt="Icon preview" className="w-8 h-8 object-contain" />
+                ) : (
+                  <span className="text-xl">🔗</span>
+                )}
+                {/* Remove button if custom icon is set */}
+                {icon && (
+                  <div
+                    className="absolute inset-0 bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
+                    onClick={handleRemoveIcon}
+                  >
+                    <X className="w-4 h-4 text-white" />
+                  </div>
+                )}
+              </div>
+
+              {/* Upload Button */}
+              <div className="flex-1">
+                <input
+                  type="file"
+                  ref={fileInputRef}
+                  accept="image/png, image/jpeg, image/x-icon, image/svg+xml"
+                  className="hidden"
+                  onChange={handleIconChange}
+                />
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  className="w-full"
+                  onClick={() => fileInputRef.current?.click()}
+                >
+                  <Upload className="w-4 h-4 mr-2" />
+                  {icon ? "Change Icon" : "Upload Custom Icon"}
+                </Button>
+                <p className="text-[8px]! text-muted-foreground mt-1">
+                  {icon ? "Custom icon selected (Base64)" : "Default icon will be used if empty"}
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* --- DESCRIPTION --- */}
           <div className="space-y-2">
             <div className="flex justify-between items-center">
-                <Label htmlFor="bookmark-description">Description</Label>
-                <span className={cn("text-xs", isDescInvalid ? "text-red-500 font-bold" : "text-muted-foreground")}>
-                    {description.length}/{MAX_DESC_LENGTH}
-                </span>
+              <Label htmlFor="bookmark-description">Description</Label>
+              <span className={cn("text-xs", isDescInvalid ? "text-red-500 font-bold" : "text-muted-foreground")}>
+                {description.length}/{MAX_DESC_LENGTH}
+              </span>
             </div>
             <Textarea
               id="bookmark-description"
               value={description}
               onChange={(e) => {
-                  setDescription(e.target.value);
-                  if (errorMsg) setErrorMsg(null);
+                setDescription(e.target.value);
+                if (errorMsg) setErrorMsg(null);
               }}
               placeholder="Optional description"
               rows={3}
-              className={cn(
-                  isDescInvalid && "border-red-500 focus-visible:ring-red-500"
-              )}
+              className={cn(isDescInvalid && "border-red-500 focus-visible:ring-red-500")}
             />
           </div>
 
@@ -178,8 +298,8 @@ export function AddBookmarkModal({ open, onClose, parentFolderId }: AddBookmarkM
               <Button type="button" variant="outline" onClick={handleClose}>
                 Cancel
               </Button>
-              <Button 
-                type="submit" 
+              <Button
+                type="submit"
                 disabled={!title.trim() || !url.trim() || loading || isTitleInvalid || isDescInvalid}
               >
                 {loading ? "Saving..." : "Save Bookmark"}

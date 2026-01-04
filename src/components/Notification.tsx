@@ -43,7 +43,7 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
     <NotificationContext.Provider value={{ showNotification, setPosition }}>
       {children}
       {notification && (
-        <div className={`fixed z-[100] p-4 ${getPositionClass(position)}`}>
+        <div className={`fixed z-100 p-4 ${getPositionClass(position)}`}>
           <div
             className={`min-w-[250px] max-w-xs rounded-md shadow-lg px-4 py-3 text-white ${getBgColor(
               notification.type

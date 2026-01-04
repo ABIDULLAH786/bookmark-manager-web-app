@@ -6,9 +6,9 @@ import { useNotification } from "@/components/Notification";
 import { Input } from "@/components/ui/input";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import LoginWithGoogleButton from "@/components/LoginWithGoogleButton";
 import Container from "@/components/CenterContainer";
 import { Label } from "@/components/ui/label";
+import LoginWithGoogleButton from '@/components/buttons/LoginWithGoogleButton';
 function RegisterPage() {
   const [formData, setFormData] = useState({
     email: "",
