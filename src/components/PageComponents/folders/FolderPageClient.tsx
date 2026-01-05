@@ -36,7 +36,7 @@ export default function FolderPageClient({ id }: FolderPageClientProps) {
     }, [singleFolder])
 
     if (singleFolderError) console.error(singleFolderError)
-    if (singleFolderLoading || true) return <PageMainAreaSkeleton />
+    if (singleFolderLoading) return <PageMainAreaSkeleton />
 
     return (
         <div className="flex h-[calc(100vh-60px)]">
