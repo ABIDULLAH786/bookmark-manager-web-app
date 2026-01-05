@@ -4,7 +4,7 @@ import { Bookmark, Folder, Search, Moon, Sun, Layers, Zap, Shield, Grid3x3, Arro
 import { Button } from "@/components/ui/button";
 import ThemeToggle from "@/components/ThemeToggle";
 import Link from "next/link";
-import { BRAND_NAME, GITHUB_URL } from "@/constants";
+import { BRAND_NAME, GITHUB_URL, VIEW_DEMO_URL } from "@/constants";
 import { getServerSession } from "next-auth";
 
 import { authOptions } from "@/lib/auth";
@@ -90,7 +90,10 @@ const session = await getServerSession(authOptions);
                 size="lg"
                 className="w-full sm:w-auto h-11 sm:h-12 px-6 sm:px-8 text-sm sm:text-base bg-card/50 backdrop-blur-sm"
               >
+                <a href={VIEW_DEMO_URL} target="_blank" rel="noopener noreferrer">
+
                 View Demo
+                </a>
                 <ChevronRight className="ml-2 w-4 h-4" />
               </Button>
             </div>

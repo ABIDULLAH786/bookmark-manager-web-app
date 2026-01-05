@@ -37,7 +37,7 @@ export function Header({ currentFolder }: HeaderProps) {
           </div>
         </div>
         <div className='flex items-center justify-center gap-4 md:pr-5'>
-          <ThemeToggle />
+          {/* <ThemeToggle /> */}
           {session || true ? <UserDropDown /> : null}
         </div>
       </div>
@@ -53,6 +53,7 @@ import { Avatar, AvatarFallback } from './ui/avatar';
 import { signOut } from 'next-auth/react';
 import { BRAND_NAME } from '@/constants';
 import { useBookmarkActions } from '@/hooks/useBookmarkActions';
+import { ThemeSwitcherTabs } from './ThemeSwitcherTabs';
 
 export default function UserDropDown() {
   const { data: session } = useSession();
@@ -85,6 +86,15 @@ export default function UserDropDown() {
             <span> User:</span>
             <span> {session?.user?.name ?? session?.user?.email?.split("@")[0]}</span>
           </DropdownMenuLabel>
+          <DropdownMenuSeparator />
+          {/* THEME SECTION */}
+          <div className="px-2 py-2 space-y-2">
+            <p className="text-xs font-medium text-muted-foreground">
+              Theme Preference
+            </p>
+            <ThemeSwitcherTabs />
+          </div>
+
           <DropdownMenuSeparator />
           <DropdownMenuItem className='cursor-pointer' onClick={handleExport}>
             <Download className="h-4 w-4" /> Export Bookmarks
